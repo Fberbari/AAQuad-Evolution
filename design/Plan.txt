@@ -1,0 +1,10 @@
+milestones:
+
+1. Making sure the timing is correct and that correct info gets passed via I2C in simulation.
+2. Outputting the exact same pwm delivered by throttle channel of the receiver to the motors with unseable lag.
+3. Adding bank, pitch and yaw and making sure correct output is processed in simulation.
+4. Testing on the actual board, with the actual quad.
+5. Read from both sensors in a timely manner, make sure all info has time to be processed.
+6. Output only Sensor data to the quad, making sure the Sensor algorythims behave properly.
+7. Combine Sensor and pilot data in Simulation
+8. Verify output in real life. 

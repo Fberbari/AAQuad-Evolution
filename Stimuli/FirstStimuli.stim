@@ -1,0 +1,10 @@
+// This stimuli file is sufficient for testing the triggering of external interrupt 0 on PORTD2
+
+PORTD = 0;
+#5
+$repeat 100
+#5
+PIND = 4;
+#5
+PIND = 0;
+$endrep

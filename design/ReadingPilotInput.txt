@@ -1,0 +1,16 @@
+Pilot instruction class interface:
+
+- Init
+- Get Data, returns NULL if no new data available, returns the data struct if new data is available.
+- #defines in the header to cover max angles
+
+
+
+
+
+
+#receiver info:
+
+- Pwm signals have a period of 20 ms.
+- They are active high for anywhere from 1-2 ms.
+- One happens right after the other so that all channels have sent info ~12ms after the first pulse.
