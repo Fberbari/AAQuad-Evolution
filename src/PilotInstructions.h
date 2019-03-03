@@ -7,6 +7,10 @@
  * Definitions
  **********************************************************************************************************************/
 
+#define MAX_PWM_DUTYCYCLE_S 0.002f	// max DutyCycle that the pwm signal from the receiver can have  
+#define MIN_PWM_DUTYCYCLE_S	0.001f	// min DutyCycle that the pwm signal from the receiver can have  
+
+
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
@@ -18,21 +22,15 @@
 void PilotInstructions_Init(void);
 
 /**
-* Executes a cycle of the module.
-* Returns AAQUAD_SUCCEEDED if new commands are available.
-* Returns AAQUAD_BUSY if data is being processed.
-* Returns AAQUAD_FAILED if the module failed internally.
-* @return 			AAQUAD_SUCCEEDED, AAQUAD_BUSY, AAQUAD_FAILED
-*/
-int PilotInstructions_Do(void);
-
-/**
-* Gives the latest information read from the receiver, if it is available.
-* Will only give valid data if all 4 receiver channels were updated after the last time the user called this function.
-* If this function is called before new data is available, the isUpdated field of the return struct will be false.
+* Gathers and processes the latest information read from the receiver, if it is available.
+* Will retun AAQUAD_SUCCEEDED if all 4 receiver channels were updated after
+* the last time the user called this function and the data was valid.
+* Will return AAQUAD_BUSY if all 4 channels are not updated yet.
+* Will return AAQUAD_FAILED in case of any internal failure.
 * @param[out]	PilotResult 		A pointer the PilotInstructions struct.
+* @return 		AAQUAD_SUCCEEDED, AAQUAD_BUSY, AAQUAD_FAILED
 */
-void PilotInstructions_GetPilotResult(PilotResult_t *PilotResult);
+int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult);
 
 
 
