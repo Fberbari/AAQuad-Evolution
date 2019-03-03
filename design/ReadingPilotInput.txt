@@ -1,11 +1,13 @@
-Pilot instruction class interface:
+Pilot instruction module interface:
 
 - Init
 - Get Data, returns NULL if no new data available, returns the data struct if new data is available.
 - #defines in the header to cover max angles
 
 
-
+Workings:
+An ISR that is in another file puts a timestamp into the pilot instructions module by calling one of it's functions. (that function also decides wether it was a rising or falling edge).
+Nothing else happens until Controller starts calling do, at which point the data is processed. When that is finished, the do function returns success and Controller may collect the data.
 
 
 

@@ -1,0 +1,4 @@
+interface:
+
+- Init
+- compute: takes in a pointer to the pilotInstructions struct and returns an array of 4 motors, representing the 

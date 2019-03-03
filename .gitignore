@@ -1,1 +1,5 @@
 build
+test-build
+test/support
+vendor
+ceedling

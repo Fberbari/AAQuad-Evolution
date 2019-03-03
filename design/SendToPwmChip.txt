@@ -1,0 +1,10 @@
+pwm chip module Interface
+
+-Init
+- send: returns Succeeded or failed.
+
+
+Workings:
+
+an array of 4 numbers 0-100 that represent the requested motor strength is passed in. The module translates
+that into pwm chip language and sends it via I2C to the chip. This has to be a blocking call and it must complete before the next pilot input comes through.
