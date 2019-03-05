@@ -10,7 +10,6 @@
 #define MAX_PWM_DUTYCYCLE_S 0.002f	// max DutyCycle that the pwm signal from the receiver can have  
 #define MIN_PWM_DUTYCYCLE_S	0.001f	// min DutyCycle that the pwm signal from the receiver can have  
 
-
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/

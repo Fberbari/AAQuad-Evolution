@@ -43,7 +43,7 @@ void test_PilotInstructions_HandlesMaxDutyCycleInput(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = INT_VALUE_0;
-	uint16_t timestamp1 = timestamp0 + ( MAX_PWM_DUTYCYCLE_S * F_CPU );
+	uint16_t timestamp1 = timestamp0 + ( MAX_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER);
 
 	PilotResult_t ReturnedPilotResult;
 
@@ -66,7 +66,7 @@ void test_PilotInstructions_HandlesMinDutyCycleInput(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = INT_VALUE_0;
-	uint16_t timestamp1 = timestamp0 + ( MIN_PWM_DUTYCYCLE_S * F_CPU );
+	uint16_t timestamp1 = timestamp0 + ( MIN_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER );
 
 	PilotResult_t ReturnedPilotResult;
 
@@ -91,7 +91,7 @@ void test_PilotInstructions_ReturnsBusyIfInputTooLarge(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = INT_VALUE_0;
-	uint16_t timestamp1 = timestamp0 + (MAX_PWM_DUTYCYCLE_S * F_CPU) + 1;
+	uint16_t timestamp1 = timestamp0 + (MAX_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER) + 1;
 
 	/********************EXPECTATIONS*******************/
 	/********************STEPTHROUGH********************/
@@ -113,7 +113,7 @@ void test_PilotInstructions_ReturnsBusyIfInputTooSmall(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = INT_VALUE_0;
-	uint16_t timestamp1 = timestamp0 + (MIN_PWM_DUTYCYCLE_S * F_CPU) - 1;
+	uint16_t timestamp1 = timestamp0 + (MIN_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER) - 1;
 
 	/********************EXPECTATIONS*******************/
 	/********************STEPTHROUGH********************/
@@ -133,7 +133,7 @@ void test_PilotInstructions_HandlesTimerWrapAroundValid(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = MAX_16BIT_VALUE - INT_VALUE_0;
-	uint16_t timestamp1 = (MAX_PWM_DUTYCYCLE_S * F_CPU ) - INT_VALUE_0;
+	uint16_t timestamp1 = (MAX_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER) - INT_VALUE_0;
 
 	PilotResult_t ReturnedPilotResult;
 
@@ -156,7 +156,7 @@ void test_PilotInstructions_ReturnsBusyIfTimerWrapAroundAndInputTooLarge(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = MAX_16BIT_VALUE - INT_VALUE_0;
-	uint16_t timestamp1 = (MAX_PWM_DUTYCYCLE_S * F_CPU ) - INT_VALUE_0 + 1;
+	uint16_t timestamp1 = (MAX_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER) - INT_VALUE_0 + 1;
 
 	/********************EXPECTATIONS*******************/
 	/********************STEPTHROUGH********************/
@@ -176,7 +176,7 @@ void test_PilotInstructions_ReturnsBusyIfTimerWrapAroundAndInputTooSmall(void)
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = MAX_16BIT_VALUE - INT_VALUE_0;
-	uint16_t timestamp1 = (MIN_PWM_DUTYCYCLE_S * F_CPU ) - ( INT_VALUE_0 + 1 );
+	uint16_t timestamp1 = (MIN_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER) - ( INT_VALUE_0 + 1 );
 
 	/********************EXPECTATIONS*******************/
 	/********************STEPTHROUGH********************/
@@ -196,7 +196,7 @@ void test_PilotInstructions_ReturnsBusyIfUserAttemptsToGetResultBeforeUpdatedDat
    	/***********************SETUP***********************/
 
 	uint16_t timestamp0 = INT_VALUE_0;
-	uint16_t timestamp1 = timestamp0 + ( MIN_PWM_DUTYCYCLE_S * F_CPU );
+	uint16_t timestamp1 = timestamp0 + ( MIN_PWM_DUTYCYCLE_S * F_CPU / TIMER_1_PRESCALER);
 
 	/********************EXPECTATIONS*******************/
 	/********************STEPTHROUGH********************/

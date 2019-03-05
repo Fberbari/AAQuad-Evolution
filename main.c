@@ -7,28 +7,34 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-
-#define F_CPU 8000000U
-
+#include "PilotInstructions.h"
+#include "Common.h"
 
 static volatile int a;
 
 int main(void)
 {	
 	// external int 0
-	EIMSK |= (1 << INT0); // enable the int0 interrupt
-	EICRA |= (1 << ISC00);	// will fire at any logical change
+	EIMSK |= (1 << INT1); // enable the int0 interrupt
+	EICRA |= (1 << ISC10);	// will fire at any logical change
+	
+	// set the 16 bit timer to normal mode
+	TCCR1B = (1 << CS11);	// 8x preScaler
 	
 	sei();
-	volatile int b;
+
+	PilotResult_t PilotResult = {0};
+
+	PilotInstructions_Init();
 	
     while (1) 
     {
-		b ++;
+	
+		int r = PilotInstructions_ComputePilotResult(&PilotResult);
+		if (r != AAQUAD_BUSY)
+		{
+			volatile int crap;
+			crap ++;
+		}
     }
-}
-
-ISR(INT0_vect)
-{
-	a++;
 }

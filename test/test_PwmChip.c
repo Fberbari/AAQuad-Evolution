@@ -1,5 +1,8 @@
 #include "unity.h"
 #include "PwmChip.h"
+#include <stdlib.h>
+
+#include "mock_I2CDriver.h"
 
 void setUp(void)
 {

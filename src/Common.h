@@ -17,6 +17,9 @@
 #define AAQUAD_FAILED 0 
 
 
+#define TIMER_1_PRESCALER	8U
+
+
 typedef struct
 {
 	float xAngle;			// the requested pitch angle
@@ -31,6 +34,5 @@ typedef struct
  **********************************************************************************************************************/
 
 float map(float num, float minInput, float maxInput, float minOutput, float maxOutput);
-
 
 #endif // _COMMON_H

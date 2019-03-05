@@ -28,6 +28,7 @@ NewDataAvailable_t NewDataAvailable;
 static uint16_t newestThrottleTimestamp;
 static uint16_t previousThrottleTimestamp; 
 
+
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
@@ -93,11 +94,11 @@ static void GetDutyCycles(DutyCycle_t *DutyCycle)
 {
 	if (ThrottleTimerWrappedAround())
 	{
-		DutyCycle->throttle = ( (float) (newestThrottleTimestamp + (MAX_16_BIT_VALUE - previousThrottleTimestamp)) / F_CPU);
+		DutyCycle->throttle = ( ( (float) (newestThrottleTimestamp + (MAX_16_BIT_VALUE - previousThrottleTimestamp)) * TIMER_1_PRESCALER ) / F_CPU);
 	}
 	else
 	{
-		DutyCycle->throttle = ( (float) (newestThrottleTimestamp - previousThrottleTimestamp) / F_CPU);
+		DutyCycle->throttle = ( ( (float) (newestThrottleTimestamp - previousThrottleTimestamp)  * TIMER_1_PRESCALER ) / F_CPU);
 	}
 }
 

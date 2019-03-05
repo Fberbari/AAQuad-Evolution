@@ -1,0 +1,14 @@
+// This file simulates a throttle input of about 50 %
+
+
+#1000				// give some time for things to initialise
+$break
+
+$repeat 10
+
+PIND = 8;
+#12000				// this many clock cycles equates to 1.5 ms on a cpu running at 8MHz (this is the encoding of a 50% strength signal)
+PIND = 0;
+#164000				// this many clock cycles equates to 20 ms on a cpu running at 8MHz (this is the rest of the period of the waveform)
+
+$endrep
