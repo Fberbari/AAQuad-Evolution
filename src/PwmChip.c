@@ -1,12 +1,13 @@
 #include "PwmChip.h"
 
 #include "I2CDriver.h"
+#include <avr/io.h>
 
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
-static void encode_motors(uint8_t motor, int* motors, uint8_t* instruction);
+static void encode_motors(uint8_t motor, float* motors, uint8_t* instruction);
 
 /***********************************************************************************************************************
  * Code
@@ -14,6 +15,7 @@ static void encode_motors(uint8_t motor, int* motors, uint8_t* instruction);
 
 void PwmChip_Init(void)
 {
+	I2CDriver_Init();
 
 	DDRB |= (1 << 2);	// set OE to 0;
 
@@ -26,7 +28,7 @@ void PwmChip_Init(void)
 	I2CDriver_SendSlaveRegister(0xFE);	//pre scale register
 	I2CDriver_SendData(121);	//prescaler that corresponds to a 50 Hz frequency
 	I2CDriver_RepeatStart();
-	I2CDriver_SendSlaveAddressWrite(0x9E);
+	I2CDriver_SendSlaveAddressWrite(0x4F);
 	I2CDriver_SendSlaveRegister(0x0); // mode register 1
 	I2CDriver_SendData(0x21); //clock on, autoincrement enable
 	I2CDriver_Stop();
@@ -91,12 +93,13 @@ int PwmChip_Send(float *motors)
 	I2CDriver_SendData(instruction[1]);
 	I2CDriver_Stop();
 
-
+	return AAQUAD_SUCCEEDED;
 }
 
-static void encode_motors(uint8_t motor, int* motors, uint8_t* instruction){
+static void encode_motors(uint8_t motor, float* motors, uint8_t* instruction)
+{
 	
-	uint16_t temp = motors[motor]*2;	// the actualslope of this curve is 2.05
+	uint16_t temp = (uint16_t) motors[motor]*2.05f;	// the actualslope of this curve is 2.05
 	
 	temp += 205;	// 205 is the value corresponding to 0 for the esc
 	

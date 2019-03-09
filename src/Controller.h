@@ -18,12 +18,6 @@
 void Controller_Init(void);
 
 /**
-* Initialises all modules that controller is in charge of handling.
-* Should be called once, right after Controller_Init is called and before any other functions in this module or library are called.
-*/
-void Controller_InitAll(void);
-
-/**
 * Executes a cycle of controller.
 * Meant to be calledin an infinite loop.
 */

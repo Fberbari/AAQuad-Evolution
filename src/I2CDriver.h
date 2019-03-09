@@ -7,7 +7,7 @@
  * Definitions
  **********************************************************************************************************************/
 
-#define BIT_RATE 100	// in KHz
+#define I2C_BIT_RATE 50000.0f	// in Hz
 
 /***********************************************************************************************************************
  * Prototypes
@@ -31,7 +31,7 @@ int I2CDriver_Start(void);
 * Will return AAQuad Failed if the hardware fails.
 * @return 			AAQuad_Failed or AAQuad_Succeeded
 */
-int I2CDriver_RepeatStart(void)
+int I2CDriver_RepeatStart(void);
 
 /**
 * Begins a write communication with the slave with the given address.

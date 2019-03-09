@@ -1,9 +1,11 @@
 #include "I2CDriver.h"
 #include <avr/io.h>
 
+
 void I2CDriver_Init(void)
 {
-	TWBR0 = (uint8_t) ( F_CPU / ( BIT_RATE * 1000) );
+	TWSR0 &= ~( (1 << TWPS0) | (1 << TWPS1) );	// no prescaler
+	TWBR0 = (uint8_t) ((((float) F_CPU / I2C_BIT_RATE) - 16.0f ) / 2.0f);
 }
 
 int I2CDriver_Start(void)
@@ -12,7 +14,8 @@ int I2CDriver_Start(void)
 
 	while(! (TWCR0 & (1 << TWINT)) ); // Hardware will write this to 0 when ready to go
 
-	if ( (TWSR0 & 0xf8) != 0x08){ // comfirms that status is infact start condition has gone through
+	if ( (TWSR0 & 0xf8) != 0x08) // comfirms that status is infact start condition has gone through
+	{
 
 		return AAQUAD_FAILED; 
 	}
@@ -28,7 +31,8 @@ int I2CDriver_RepeatStart(void)
 
 	while(! (TWCR0 & (1 << TWINT)) ); // Hardware will write this to 0 when ready to go
 
-	if ( (TWSR0 & 0xf8) != 0x10){ // comfirms reapeated start
+	if ( (TWSR0 & 0xf8) != 0x10)  // comfirms reapeated start
+	{
 
 		return AAQUAD_FAILED; 
 	}
@@ -40,7 +44,7 @@ int I2CDriver_SendSlaveAddressWrite(uint8_t slaveAddress)
 {
 	// send slave address + write bit
 
-	TWDR0 = ( address << 1 );
+	TWDR0 = ( slaveAddress << 1 );
 
 	TWCR0 = ( (1 << TWINT) | (1 << TWEN) );
 
@@ -60,7 +64,7 @@ int I2CDriver_SendSlaveRegister(uint8_t registerAddress)
 {
 	// send  address of register to be written
 
-	TWDR0 = reg; 
+	TWDR0 = registerAddress; 
 
   	TWCR0 = ( (1 << TWINT) | (1 << TWEN) );
 
