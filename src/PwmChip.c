@@ -42,7 +42,7 @@ int PwmChip_Send(float *motors)
 
 	uint8_t instruction[2];
 	
-	encode_motors(0, motors, instruction);
+	encode_motors(1, motors, instruction);
 
 	I2CDriver_Start();
 	I2CDriver_SendSlaveAddressWrite(0x4F);
@@ -54,7 +54,7 @@ int PwmChip_Send(float *motors)
 	I2CDriver_Stop();
 
 
-	encode_motors(1, motors, instruction);
+	encode_motors(0, motors, instruction);
 	
 
 	I2CDriver_Start();
