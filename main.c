@@ -36,9 +36,21 @@ int main(void)
 
 static void InitPeripherals(void)
 {
-	// external int 0
-	EIMSK |= (1 << INT1); // enable the int0 interrupt
+	// aileron
+	EIMSK |= (1 << INT0); // enable the int0 interrupt												
+	EICRA |= (1 << ISC00);	// will fire at any logical change
+
+	// throttle
+	EIMSK |= (1 << INT1); // enable the int1 interrupt
 	EICRA |= (1 << ISC10);	// will fire at any logical change
+
+	// rudder
+	PCICR |= (1 << PCIE1);	// enable pcint 1
+	PCMSK1 |= (1 << PCINT11);
+
+	//elevator
+	PCICR |= (1 << PCIE2);	// enable pcint 2
+	PCMSK2 |= (1 << PCINT17);
 	
 	// set the 16 bit timer to normal mode
 	TCCR1B = (1 << CS11);	// 8x preScaler

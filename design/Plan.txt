@@ -8,3 +8,11 @@ milestones:
 6. Output only Sensor data to the quad, making sure the Sensor algorythims behave properly.
 7. Combine Sensor and pilot data in Simulation
 8. Verify output in real life. 
+
+
+
+Phase 1: All motors conrolled in unison, with the computer reading only the throttle channel and outputting the same signal to all 4 channels.      [Completed]
+
+Phase 2: Roll, pitch, and yaw incorporated into the segnals sent by the computer to the motors, full controlability available to the pilot.
+
+Phase 3: Sensor data incorporated into the signals to cosistently keep the quad leve, wether or not pilot gives any input.

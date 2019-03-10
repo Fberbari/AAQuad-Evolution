@@ -19,7 +19,7 @@ int Pid_Compute(PilotResult_t *PilotResult, float *motors)
 {
 	for (int i = 0; i < 4; i++)
 	{
-		motors[i] = PilotResult->throttlePower;
+		motors[i] = PilotResult->throttlePercentage;
 	}
 
 	return AAQUAD_SUCCEEDED;

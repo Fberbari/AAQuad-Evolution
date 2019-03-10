@@ -22,10 +22,10 @@
 
 typedef struct
 {
-	float xAngle;			// the requested pitch angle
-	float yAngle;			// the requested bank angle
-	float zRate;			// the requested yaw rate in deg/s
-	float throttlePower;	// a percentage between 0 and 100
+	float xPercentage;			// a number between -100 and 100 that represents the Elevator channel
+	float yPercentage;			// a number between -100 and 100 that represents the Aileron channel
+	float zPercentage;			// a number between -100 and 100 that represents the Rudder Channel
+	float throttlePercentage;		// a number between 0 and 100 that represents the Throttle channel
 
 }PilotResult_t;
 
