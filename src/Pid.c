@@ -15,7 +15,7 @@ void Pid_Init(void)
 }
 
 
-int Pid_Compute(PilotResult_t *PilotResult, float *motors)
+int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, float *motors)
 {
 	float xAdjustement = (MAX_X_THROW / 100.0f) * PilotResult->xPercentage;
 	float yAdjustement = (MAX_Y_THROW / 100.0f) * PilotResult->yPercentage;

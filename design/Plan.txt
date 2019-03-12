@@ -13,6 +13,9 @@ milestones:
 
 Phase 1: All motors conrolled in unison, with the computer reading only the throttle channel and outputting the same signal to all 4 channels.      [Completed]
 
-Phase 2: Roll, pitch, and yaw incorporated into the segnals sent by the computer to the motors, full controlability available to the pilot.
+Phase 2: Roll, pitch, and yaw incorporated into the segnals sent by the computer to the motors, full controlability available to the pilot.			[Completed]
 
 Phase 3: Sensor data incorporated into the signals to cosistently keep the quad leve, wether or not pilot gives any input.
+	a. Deliver only accelerometer data to the quad.
+	b. combine accelerometer and pilot data.
+	c. Combine accelerometer, gyroscope and pilot data.

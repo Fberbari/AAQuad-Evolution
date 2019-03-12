@@ -1,5 +1,6 @@
 #include "Controller.h"
 #include "PilotInstructions.h"
+#include "SensorData.h"
 #include "PwmChip.h"
 #include "Pid.h"
 
@@ -10,6 +11,7 @@
 typedef enum state
 {
 	CTRL_GET_PILOT_RESULT,
+	CTRL_GET_SENSOR_DATA,
 	CTRL_COMPUTE_RESULT,
 	CTRL_SEND_TO_PWM,
 	CTRL_FAILED
@@ -23,6 +25,8 @@ typedef enum state
 static Controller_State_t currentState;
 
 static PilotResult_t PilotResult;
+static SensorResults_t SensorResults;
+
 static float motors[4];
 
 /***********************************************************************************************************************
@@ -30,6 +34,7 @@ static float motors[4];
  **********************************************************************************************************************/
 
 static Controller_State_t GetPilotResult_State(void);
+static Controller_State_t GetSensorData_State(void);
 static Controller_State_t ComputeResult_State(void);
 static Controller_State_t SendToPwm_State(void);
 
@@ -41,6 +46,7 @@ void Controller_Init(void)
 {
 	PilotInstructions_Init();
 	PwmChip_Init();
+	SensorData_Init();
 
 	currentState = CTRL_GET_PILOT_RESULT;
 
@@ -53,6 +59,10 @@ void Controller_Do(void)
 	{
 		case CTRL_GET_PILOT_RESULT:
 			nextState = GetPilotResult_State();
+			break;
+
+		case CTRL_GET_SENSOR_DATA:
+			nextState = GetSensorData_State();
 			break;
 
 		case CTRL_COMPUTE_RESULT:
@@ -81,15 +91,22 @@ static Controller_State_t GetPilotResult_State(void)
 
 	if(r == AAQUAD_SUCCEEDED)
 	{
-		return CTRL_COMPUTE_RESULT;
+		return CTRL_GET_SENSOR_DATA;
 	}
 
 	return CTRL_FAILED;
 }
 
+static Controller_State_t GetSensorData_State(void)
+{
+	SensorData_GetResult(&SensorResults);
+
+	return CTRL_COMPUTE_RESULT;
+}
+
 static Controller_State_t ComputeResult_State(void)
 {
-	Pid_Compute(&PilotResult, motors);
+	Pid_Compute(&PilotResult, &SensorResults, motors);
 
 	return CTRL_SEND_TO_PWM;
 }

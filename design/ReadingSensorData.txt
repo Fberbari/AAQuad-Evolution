@@ -1,0 +1,6 @@
+
+- Sensor data is collected once, right after the Pilot Result struct is collected.
+- Sensor data is returned as a SensorResult struct that contains x angle, y angle and z rate.
+
+
+interface is init and getResult.

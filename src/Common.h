@@ -25,9 +25,16 @@ typedef struct
 	float xPercentage;			// a number between -100 and 100 that represents the Elevator channel
 	float yPercentage;			// a number between -100 and 100 that represents the Aileron channel
 	float zPercentage;			// a number between -100 and 100 that represents the Rudder Channel
-	float throttlePercentage;		// a number between 0 and 100 that represents the Throttle channel
+	float throttlePercentage;	// a number between 0 and 100 that represents the Throttle channel
 
 }PilotResult_t;
+
+typedef struct 
+{
+	float xAngle;				// pitch angle in degrees (positive is when motor 0 lowers, 0 is level)
+	float yAngle;				// bank angle in degrees (positive is when motor 3 lowers, 0 is level)
+	float zRate;				// rotation speed in degrees per second (positive is clockwise when looking down at the quad)
+}SensorResults_t;
 
 /***********************************************************************************************************************
  * Prototypes
