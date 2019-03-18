@@ -9,10 +9,20 @@
 
 // percentage that determines what percentage of maximum motor power will be increased when 100% is increased on the x,y, and z channels
 // For ex: if the quad was level, and MAX_X_THROW was 10, moving the X stick to it's 50 % position would result in 2 motors reducing their power by 5% of maximum and 2 motors increasing their power by 5% of maximum.
-
 #define MAX_X_THROW 10.0f	
 #define MAX_Y_THROW 10.0f
 #define MAX_Z_THROW 10.0f
+
+#define X_SENSOR_SENSITIVITY 30.0f
+#define Y_SENSOR_SENSITIVITY 30.0f
+
+
+ typedef struct 
+ {
+	float x;				
+	float y;
+
+ }InitialAngles_t;
 
 /***********************************************************************************************************************
  * Prototypes
@@ -23,6 +33,14 @@
 * Should be called once before annything is attempted to be done with the module
 */
 void Pid_Init(void);
+
+/**
+* Meant To Be called by Calibration.
+* Sets the initial angle that the quad is sitting at
+* in the goal of the gyroscope measurements being used relative to it.
+* @param[in]		initialAngles 		Pointer to the inital angles struct.
+*/
+void Pid_CalibrateInitialAngles(InitialAngles_t *InitialAngles);
 
 /**
 * Combines the pilot instructions and the sensor data to compute the required power each motor must have.

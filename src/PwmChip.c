@@ -9,6 +9,8 @@
 
 static void encode_motors(uint8_t motor, float* motors, uint8_t* instruction);
 
+static void InitMotors(void);
+
 /***********************************************************************************************************************
  * Code
  **********************************************************************************************************************/
@@ -19,10 +21,6 @@ void PwmChip_Init(void)
 
 	DDRB |= (1 << 2);	// set OE to 0;
 
-	//This function sets the auto increment, the prescaler and any other necessary feature required for the pwm chip to run 
-
-	//TWBR0 = (1 << 1); // I'll run the cpu at 1 MHz, this divides the value by 2 for 50 KHZ
-
 	I2CDriver_Start();
 	I2CDriver_SendSlaveAddressWrite(0x4F);
 	I2CDriver_SendSlaveRegister(0xFE);	//pre scale register
@@ -32,6 +30,8 @@ void PwmChip_Init(void)
 	I2CDriver_SendSlaveRegister(0x0); // mode register 1
 	I2CDriver_SendData(0x21); //clock on, autoincrement enable
 	I2CDriver_Stop();
+
+	InitMotors();
 
 }
 
@@ -107,4 +107,10 @@ static void encode_motors(uint8_t motor, float* motors, uint8_t* instruction)
 	
 	instruction[1] = ( temp >> 8);	// conserves only the high half-byte
 	
+}
+
+
+
+static void InitMotors(void)
+{
 }

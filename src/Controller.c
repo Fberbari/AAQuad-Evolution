@@ -12,8 +12,9 @@ typedef enum state
 {
 	CTRL_GET_PILOT_RESULT,
 	CTRL_GET_SENSOR_DATA,
-	CTRL_COMPUTE_RESULT,
+	CTRL_PROCESS_RESULTS,
 	CTRL_SEND_TO_PWM,
+	CTRL_RESET_FOR_NEXT_LOOP,
 	CTRL_FAILED
 
 }Controller_State_t;
@@ -35,8 +36,9 @@ static float motors[4];
 
 static Controller_State_t GetPilotResult_State(void);
 static Controller_State_t GetSensorData_State(void);
-static Controller_State_t ComputeResult_State(void);
+static Controller_State_t ProcessResults_State(void);
 static Controller_State_t SendToPwm_State(void);
+static Controller_State_t ResetForNextLoop_State(void);
 
 /***********************************************************************************************************************
  * Code
@@ -47,8 +49,16 @@ void Controller_Init(void)
 	PilotInstructions_Init();
 	PwmChip_Init();
 	SensorData_Init();
+	Pid_Init();
 
-	currentState = CTRL_GET_PILOT_RESULT;
+	SensorResults.xAccAngle = 0;
+	SensorResults.yAccAngle = 0;
+	SensorResults.xGyroRate = 0;
+	SensorResults.yGyroRate = 0;
+	SensorResults.zGyroRate = 0;
+	SensorResults.nSamples = 0;
+
+	currentState = CTRL_GET_SENSOR_DATA;
 
 }
 
@@ -57,20 +67,24 @@ void Controller_Do(void)
 	Controller_State_t nextState;
 	switch(currentState)
 	{
-		case CTRL_GET_PILOT_RESULT:
-			nextState = GetPilotResult_State();
-			break;
-
 		case CTRL_GET_SENSOR_DATA:
 			nextState = GetSensorData_State();
 			break;
 
-		case CTRL_COMPUTE_RESULT:
-			nextState = ComputeResult_State();
+		case CTRL_GET_PILOT_RESULT:
+			nextState = GetPilotResult_State();
+			break;
+
+		case CTRL_PROCESS_RESULTS:
+			nextState = ProcessResults_State();
 			break;
 
 		case CTRL_SEND_TO_PWM:
 			nextState = SendToPwm_State();
+			break;
+
+		case CTRL_RESET_FOR_NEXT_LOOP:
+			nextState = ResetForNextLoop_State();
 			break;
 
 		default:
@@ -81,30 +95,30 @@ void Controller_Do(void)
 	currentState = nextState;
 }
 
+static Controller_State_t GetSensorData_State(void)
+{
+	SensorData_GetResult(&SensorResults);
+
+	return CTRL_GET_PILOT_RESULT;
+}
+
 static Controller_State_t GetPilotResult_State(void)
 {
 	int r = PilotInstructions_ComputePilotResult(&PilotResult);
 	if(r == AAQUAD_BUSY)
 	{
-		return CTRL_GET_PILOT_RESULT;
+		return CTRL_GET_SENSOR_DATA;
 	}
 
 	if(r == AAQUAD_SUCCEEDED)
 	{
-		return CTRL_GET_SENSOR_DATA;
+		return CTRL_PROCESS_RESULTS;
 	}
 
 	return CTRL_FAILED;
 }
 
-static Controller_State_t GetSensorData_State(void)
-{
-	SensorData_GetResult(&SensorResults);
-
-	return CTRL_COMPUTE_RESULT;
-}
-
-static Controller_State_t ComputeResult_State(void)
+static Controller_State_t ProcessResults_State(void)
 {
 	Pid_Compute(&PilotResult, &SensorResults, motors);
 
@@ -115,5 +129,17 @@ static Controller_State_t SendToPwm_State(void)
 {
 	PwmChip_Send(motors);
 
-	return CTRL_GET_PILOT_RESULT;
+	return CTRL_RESET_FOR_NEXT_LOOP;
+}
+
+static Controller_State_t ResetForNextLoop_State(void)
+{
+	SensorResults.xAccAngle = 0;
+	SensorResults.yAccAngle = 0;
+	SensorResults.xGyroRate = 0;
+	SensorResults.yGyroRate = 0;
+	SensorResults.zGyroRate = 0;
+	SensorResults.nSamples = 0;
+
+	return CTRL_GET_SENSOR_DATA;
 }

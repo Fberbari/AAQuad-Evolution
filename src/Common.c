@@ -9,3 +9,8 @@ float map(float num, float minInput, float maxInput, float minOutput, float maxO
 {
 	return minOutput + ((num - minInput) * ((maxOutput - minOutput) / (maxInput - minInput)));
 }
+
+float Square(int16_t num)
+{
+	return (float) ((float) num) * ((float) num);
+}

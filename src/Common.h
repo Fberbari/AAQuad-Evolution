@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 /***********************************************************************************************************************
  * Definitions
@@ -12,10 +13,11 @@
 
 
 
-#define AAQUAD_BUSY 2
-#define AAQUAD_SUCCEEDED 1
-#define AAQUAD_FAILED 0 
+#define AAQUAD_BUSY 		2
+#define AAQUAD_SUCCEEDED	1
+#define AAQUAD_FAILED 		0 
 
+#define CTRL_LOOP_PERIOD	0.02f	// in seconds
 
 #define TIMER_1_PRESCALER	8U
 
@@ -31,9 +33,14 @@ typedef struct
 
 typedef struct 
 {
-	float xAngle;				// pitch angle in degrees (positive is when motor 0 lowers, 0 is level)
-	float yAngle;				// bank angle in degrees (positive is when motor 3 lowers, 0 is level)
-	float zRate;				// rotation speed in degrees per second (positive is clockwise when looking down at the quad)
+	float xAccAngle;				// pitch angle in degrees (positive is when motor 0 lowers, 0 is level)
+	float yAccAngle;				// bank angle in degrees (positive is when motor 3 lowers, 0 is level)
+
+	float xGyroRate;				// rotation speed in degrees per second (positive is motor 2 dipping down and motor 0 going up)
+	float yGyroRate;				// rotation speed in degrees per second (positive is motor 3 dipping down and motor 1 going up)
+	float zGyroRate;				// rotation speed in degrees per second (positive is clockwise when looking down at the quad)
+
+	uint16_t nSamples;			// the number of samples that were taking. Divide each above member by this number after all results are accumulated to get the best guesses.
 }SensorResults_t;
 
 /***********************************************************************************************************************
@@ -41,5 +48,7 @@ typedef struct
  **********************************************************************************************************************/
 
 float map(float num, float minInput, float maxInput, float minOutput, float maxOutput);
+
+float Square(int16_t num);
 
 #endif // _COMMON_H

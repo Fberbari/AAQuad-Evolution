@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "Controller.h"
+#include "Calibration.h"
 
 /***********************************************************************************************************************
  * Prototypes
@@ -25,6 +26,11 @@ int main(void)
 
 	Controller_Init();
 	InitPeripherals();
+	Calibration_Init();
+
+
+	Calibration_Calibrate();
+
 	
     while (1) 
     {
