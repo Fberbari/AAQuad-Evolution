@@ -4,11 +4,8 @@
  * Variables
  **********************************************************************************************************************/
 
-static float xAngleFromGyro;
-static float yAngleFromGyro;
-
-static float xAngleFromAcc;
-static float yAngleFromAcc;
+static float bestGuessXAngle;
+static float bestGuessYAngle;
 
 /***********************************************************************************************************************
  * Code
@@ -17,6 +14,8 @@ static float yAngleFromAcc;
 
 void Pid_Init(void)
 {
+	bestGuessXAngle = 0;
+	bestGuessYAngle = 0;
 }
 
 
@@ -33,15 +32,15 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	//float zAdjustement = (MAX_Z_THROW / 100.0f) * PilotResult->zPercentage;
 
 
-	xAngleFromGyro += CTRL_LOOP_PERIOD * SensorResults->xGyroRate / SensorResults->nSamples;
-	yAngleFromGyro += CTRL_LOOP_PERIOD * SensorResults->yGyroRate / SensorResults->nSamples;
+	float xAngleFromGyro = bestGuessXAngle + (CTRL_LOOP_PERIOD * SensorResults->xGyroRate / SensorResults->nSamples);
+	float yAngleFromGyro = bestGuessYAngle + (CTRL_LOOP_PERIOD * SensorResults->yGyroRate / SensorResults->nSamples);
 
-	xAngleFromAcc = SensorResults->xAccAngle / SensorResults->nSamples;
-	yAngleFromAcc = SensorResults->yAccAngle / SensorResults->nSamples;
+	float xAngleFromAcc = SensorResults->xAccAngle / SensorResults->nSamples;
+	float yAngleFromAcc = SensorResults->yAccAngle / SensorResults->nSamples;
 
 
-	float bestGuessXAngle = (0.90 * xAngleFromGyro + 0.1 * xAngleFromAcc);
-	float bestGuessYAngle = (0.90 * yAngleFromGyro + 0.1 * yAngleFromAcc);
+	bestGuessXAngle = (0.90 * xAngleFromGyro + 0.1 * xAngleFromAcc);
+	bestGuessYAngle = (0.90 * yAngleFromGyro + 0.1 * yAngleFromAcc);
 
 
 	float xAdjustement = (X_SENSOR_SENSITIVITY) * bestGuessXAngle / 90.0f ;
@@ -63,6 +62,6 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 
 void Pid_CalibrateInitialAngles(InitialAngles_t *InitialAngles)
 {
-	xAngleFromGyro = InitialAngles->x;
-	yAngleFromGyro = InitialAngles->y;
+	bestGuessXAngle = InitialAngles->x;
+	bestGuessYAngle = InitialAngles->y;
 }

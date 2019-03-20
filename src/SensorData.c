@@ -75,6 +75,21 @@ int SensorData_GetResult(SensorResults_t *SensorResults)
 	return AAQUAD_SUCCEEDED;
 }
 
+void SensorData_SensorReset(void)
+{
+	I2CDriver_Start();
+	I2CDriver_SendSlaveAddressWrite(GYRO_SLAVE_ADDRESS);
+	I2CDriver_SendSlaveRegister(0x20);						// Control register 1 + autoincrement
+	I2CDriver_SendData(0x0);								// turn off all axis and power down
+	I2CDriver_Stop();	
+
+
+	I2CDriver_Start();
+	I2CDriver_SendSlaveAddressWrite(GYRO_SLAVE_ADDRESS);
+	I2CDriver_SendSlaveRegister(0x20);						// Control register 1 + autoincrement
+	I2CDriver_SendData(0x7F);								// all axis enable data refresh rate is 800Hz,
+	I2CDriver_Stop();	
+}
 
 void SensorData_CalibrateZeros(CalibratedZeros_t *Zeros)
 {

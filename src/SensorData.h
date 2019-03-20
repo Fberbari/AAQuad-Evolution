@@ -25,11 +25,11 @@
 void SensorData_Init(void);
 
 /**
-* Meant To Be called by Calibration.
-* Sets the adjustements to be given to every measurement to compensate for sensor drift over time.
-* @param[in]		CalibratedZeros 		Pointer to the struct of zero values.
+* Recommended to be called every so often.
+* The Gyroscope has been observed to grow unreliable over longer periods of time.
+* This function will reset it.
 */
-void SensorData_CalibrateZeros(CalibratedZeros_t *Zeros);
+void SensorData_SensorReset(void);
 
 /**
 * Gets and accumulates the information about the quad's orientation.
@@ -41,5 +41,11 @@ void SensorData_CalibrateZeros(CalibratedZeros_t *Zeros);
 */
 int SensorData_GetResult(SensorResults_t *SensorResults);
 
+/**
+* Meant To Be called by Calibration.
+* Sets the adjustements to be given to every measurement to compensate for sensor drift over time.
+* @param[in]		CalibratedZeros 		Pointer to the struct of zero values.
+*/
+void SensorData_CalibrateZeros(CalibratedZeros_t *Zeros);
 
 #endif // _SENSOR_DATA_H

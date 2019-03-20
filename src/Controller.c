@@ -141,5 +141,18 @@ static Controller_State_t ResetForNextLoop_State(void)
 	SensorResults.zGyroRate = 0;
 	SensorResults.nSamples = 0;
 
+	static int timeToReset;
+
+	if (timeToReset == 20)
+	{
+		SensorData_SensorReset();
+		timeToReset = 0;
+	}
+
+	else
+	{
+		timeToReset ++;
+	}
+
 	return CTRL_GET_SENSOR_DATA;
 }
