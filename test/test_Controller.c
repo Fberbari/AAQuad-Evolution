@@ -52,11 +52,11 @@ void test_Controller_FirstCallOfSensorDataIsWithACleanStruct(void)
    	/***********************SETUP***********************/
 
 	SensorResults_t ExpectedSensorResults;
-	ExpectedSensorResults.xAngle = 0;
-	ExpectedSensorResults.yAngle = 0;
-	ExpectedSensorResults.xRate = 0;
-	ExpectedSensorResults.yRate = 0;
-	ExpectedSensorResults.zRate = 0;
+	ExpectedSensorResults.xAccAngle = 0;
+	ExpectedSensorResults.yAccAngle = 0;
+	ExpectedSensorResults.xGyroRate = 0;
+	ExpectedSensorResults.yGyroRate = 0;
+	ExpectedSensorResults.zGyroRate = 0;
 	ExpectedSensorResults.nSamples = 0;
 
 	/********************EXPECTATIONS*******************/
@@ -163,15 +163,15 @@ void test_Controller_CallsGetSensorResultWithAClearedStructOnEveryNewLoop(void)
 	PwmChip_Send_IgnoreAndReturn(AAQUAD_SUCCEEDED);
 
    	SensorResults_t OldSensorResults;
-   	OldSensorResults.xAngle = FLOAT_VALUE_0;	// Ensure this one is different than the expected struct
+   	OldSensorResults.xAccAngle = FLOAT_VALUE_0;	// Ensure this one is different than the expected struct
 
 
-   	SensorResults_t ExpectedSensorResults;
-	ExpectedSensorResults.xAngle = 0;
-	ExpectedSensorResults.yAngle = 0;
-	ExpectedSensorResults.xRate = 0;
-	ExpectedSensorResults.yRate = 0;
-	ExpectedSensorResults.zRate = 0;
+	SensorResults_t ExpectedSensorResults;
+	ExpectedSensorResults.xAccAngle = 0;
+	ExpectedSensorResults.yAccAngle = 0;
+	ExpectedSensorResults.xGyroRate = 0;
+	ExpectedSensorResults.yGyroRate = 0;
+	ExpectedSensorResults.zGyroRate = 0;
 	ExpectedSensorResults.nSamples = 0;
 
 	const int NUM_LOOPS = 300;
