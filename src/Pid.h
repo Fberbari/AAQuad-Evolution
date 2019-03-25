@@ -7,14 +7,9 @@
  * Definitions
  **********************************************************************************************************************/
 
-// percentage that determines what percentage of maximum motor power will be increased when 100% is increased on the x,y, and z channels
-// For ex: if the quad was level, and MAX_X_THROW was 10, moving the X stick to it's 50 % position would result in 2 motors reducing their power by 5% of maximum and 2 motors increasing their power by 5% of maximum.
-#define MAX_X_THROW 10.0f	
-#define MAX_Y_THROW 10.0f
-#define MAX_Z_THROW 10.0f
-
-#define X_SENSOR_SENSITIVITY 30.0f
-#define Y_SENSOR_SENSITIVITY 30.0f
+// The angle that the quadCopter will be at when the control stick is at 100%
+#define MAX_X_THROW 90.0f	
+#define MAX_Y_THROW 90.0f
 
 
  typedef struct 

@@ -19,9 +19,11 @@ static void UpdateYErrorArray(float currentYError);
 
 static float XProportional(void);
 static float XDifferential(void);
+static float XIntegral(void);
 
 static float YProportional(void);
 static float YDifferential(void);
+static float YIntegral(void);
 
 static void ConstrainMotorRanges(float *motors);
 
@@ -51,10 +53,6 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 		motors[i] = PilotResult->throttlePercentage;   
 	}
 	
-	//float xAdjustement = (MAX_X_THROW / 100.0f) * PilotResult->xPercentage;
-	//float yAdjustement = (MAX_Y_THROW / 100.0f) * PilotResult->yPercentage;
-	//float zAdjustement = (MAX_Z_THROW / 100.0f) * PilotResult->zPercentage;
-
 
 	float xAngleFromGyro = bestGuessXAngle + (CTRL_LOOP_PERIOD * SensorResults->xGyroRate / SensorResults->nSamples);
 	float yAngleFromGyro = bestGuessYAngle + (CTRL_LOOP_PERIOD * SensorResults->yGyroRate / SensorResults->nSamples);
@@ -63,31 +61,29 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	bestGuessXAngle = (0.95 * xAngleFromGyro + 0.05 * xAngleFromAcc);
 	bestGuessYAngle = (0.95 * yAngleFromGyro + 0.05 * yAngleFromAcc);
 
-	float targetXAngle = 0;
-	float targetYAngle = 0;
+	float targetXAngle = (MAX_X_THROW / 100.0f) * PilotResult->xPercentage;
+	float targetYAngle = (MAX_Y_THROW / 100.0f) * PilotResult->yPercentage;
 
 	UpdateXErrorArray(targetXAngle - bestGuessXAngle);
 	UpdateYErrorArray(targetYAngle - bestGuessYAngle);
 
 
-	float xAdjustement = ( XProportional() - 0.2 * XDifferential() ) / 3.0f;
-	float yAdjustement = ( YProportional() - 0.2 * YDifferential() ) / 3.0f;
+	float xAdjustement = ( 0.3 * XProportional() - 0.25 * XDifferential() + 0.05 * XIntegral() ) / 8.0f;
+	float yAdjustement = ( 0.3 * YProportional() - 0.25 * YDifferential() + 0.05 * YIntegral() ) / 8.0f;
+	float zAdjustement = 0.3 * PilotResult->zPercentage;
 
-
-	//float xAdjustement = (X_SENSOR_SENSITIVITY) * bestGuessXAngle / 90.0f ;
-	//float yAdjustement = (Y_SENSOR_SENSITIVITY) * bestGuessYAngle / 90.0f;
 
 	motors[0] += xAdjustement;
 	motors[2] -= xAdjustement;
 
 	motors[1] += yAdjustement;
 	motors[3] -= yAdjustement;
-/*
+
 	motors[0] += zAdjustement;
 	motors[1] -= zAdjustement;
 	motors[2] += zAdjustement;
 	motors[3] -= zAdjustement;
-*/
+
 	ConstrainMotorRanges(motors);
 	
 	return AAQUAD_SUCCEEDED;
@@ -102,23 +98,53 @@ void Pid_CalibrateInitialAngles(InitialAngles_t *InitialAngles)
 
 static float XProportional(void)
 {
-	return (-0.6f * xErrorArray[0] - 0.4f * xErrorArray[1] - 0.2f * xErrorArray[2] + 0.2f * xErrorArray[4] );
+	float proportional = (0.6f * xErrorArray[0] + 0.4f * xErrorArray[1] + 0.2f * xErrorArray[2] - 0.2f * xErrorArray[4] );
+	return proportional;
 }
 
 static float YProportional(void)
 {
-	return (-0.6f * yErrorArray[0] - 0.4f * yErrorArray[1] - 0.2f * yErrorArray[2] + 0.2f * yErrorArray[4] );
+	float proportional = (0.6f * yErrorArray[0] + 0.4f * yErrorArray[1] + 0.2f * yErrorArray[2] - 0.2f * yErrorArray[4] );
+	
+	return proportional;
 }
 
 static float XDifferential(void)
 {
-	return ( (3.0f * xErrorArray[0] - 4.0f * xErrorArray[1] + 1.0f * xErrorArray[2]) / (2.0f * CTRL_LOOP_PERIOD) );
+	float differential = ( (-3.0f * xErrorArray[0] + 4.0f * xErrorArray[1] - 1.0f * xErrorArray[2]) / (2.0f * CTRL_LOOP_PERIOD) );
+	
+	return differential;
 }
 
 static float YDifferential(void)
 {
-	return ( (3.0f * yErrorArray[0] - 4.0f * yErrorArray[1] + 1.0f * yErrorArray[2]) / (2.0f * CTRL_LOOP_PERIOD) );
+	float differential = ( (-3.0f * yErrorArray[0] + 4.0f * yErrorArray[1] - 1.0f * yErrorArray[2]) / (2.0f * CTRL_LOOP_PERIOD) );
+	
+	return differential;
 }
+
+static float XIntegral(void)
+{
+	static float integral;
+
+	integral += ( xErrorArray[0] + (4 * xErrorArray[1]) + xErrorArray[2] )* 0.833 * CTRL_LOOP_PERIOD;
+
+	return integral;
+}
+
+static float YIntegral(void)
+{
+	static float integral;
+
+	integral += ( yErrorArray[0] + (4 * yErrorArray[1]) + yErrorArray[2] )* 0.833 * CTRL_LOOP_PERIOD;
+
+	return integral;
+}
+
+
+
+
+
 
 static void UpdateXErrorArray(float currentXError)
 {

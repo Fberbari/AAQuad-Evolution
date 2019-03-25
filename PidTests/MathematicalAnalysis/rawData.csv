@@ -1,0 +1,20 @@
+motor tests:,,,,,,,,,,,,,weight/length tests:,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+These where done with a single motor and a single prop in a pusher orientation pushing down onto a kitchen scale.,,,,,,,,,,,,,These were done by weighing various parts of the aircraft and measuring there distance from it's center.,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+throttle percentage,,,thrust (g),,,,,,,,,,Part,,,Weight(g),,,Horizontal distance from center (cm),,,,,Vertical distance from center (cm),,,,,Length (cm)
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+16.9,,,0,,,,,,,,,,motor + prop,,,18,,,24,,,,,1,,,,,0
+18.3,,,26,,,,,,,,,,ESC,,,11,,,9.5,,,,,0,,,,,0
+20.2,,,41,,,,,,,,,,Arm of aircraft,,,15,,,N/A,,,,,0,,,,,50
+24.8,,,60,,,,,,,,,,Battery,,,442,,,0,,,,,N/A,,,,,14
+31,,,95,,,,,,,,,,Computer Bay,,,15,,,0,,,,,3,,,,,0
+36.8,,,119,,,,,,,,,,,,,,,,,,,,,,,,,,
+40.8,,,147,,,,,,,,,,,,,,,,,,,,,,,,,,
+43.8,,,170,,,,,,,,,,Entire Aircraft,,,978,,,25,,,,,11,,,,,N/A
+49.4,,,186,,,,,,,,,,,,,,,,,,,,,,,,,,
+55.6,,,218,,,,,,,,,,,,,,,,,,,,,,,,,,
+59.7,,,242,,,,,,,,,,,,,,,,,,,,,,,,,,
+72.5,,,304,,,,,,,,,,,,,,,,,,,,,,,,,,
+81.7,,,385,,,,,,,,,,,,,,,,,,,,,,,,,,

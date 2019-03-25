@@ -9,6 +9,7 @@
 #include <avr/interrupt.h>
 #include "Controller.h"
 #include "Calibration.h"
+#include <stdlib.h>
 
 /***********************************************************************************************************************
  * Prototypes

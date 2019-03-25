@@ -27,12 +27,12 @@
 
 :paths:
   :test:
-    - +:test/**
-    - -:test/support
+    - +:UnitTests/**
+    - -:UnitTests/support
   :source:
     - src/**
   :support:
-    - test/support
+    - UnitTests/support
 
 :defines:
   # in order to add common defines:
