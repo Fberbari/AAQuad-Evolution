@@ -22,6 +22,11 @@ typedef enum state
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
+//#define COLLECT_SENSOR_DATA
+#ifdef COLLECT_SENSOR_DATA
+	static float xGyroReportedRate[150];
+	static float yGyroReportedRate[150];
+#endif
 
 static Controller_State_t currentState;
 
@@ -98,6 +103,17 @@ void Controller_Do(void)
 static Controller_State_t GetSensorData_State(void)
 {
 	SensorData_GetResult(&SensorResults);
+
+	#ifdef COLLECT_SENSOR_DATA
+		static int i;
+		xGyroReportedRate[i] = (SensorResults.xGyroRate / SensorResults.nSamples);
+		yGyroReportedRate[i] = (SensorResults.yGyroRate / SensorResults.nSamples);
+		i++;
+		if (i == 200)
+		{
+			volatile int breakHere = 9;
+		}
+	#endif
 
 	return CTRL_GET_PILOT_RESULT;
 }

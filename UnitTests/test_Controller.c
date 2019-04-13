@@ -7,6 +7,10 @@
 #include "Common.h"
 #include <string.h>
 
+#ifdef COLLECT_SENSOR_DATA
+#undef COLLECT_SENSOR_DATA
+#endif
+
 #define DUMMY_FLOAT_VALUE 1.0f
 #define FLOAT_VALUE_0 14.1f
 

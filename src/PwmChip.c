@@ -17,8 +17,6 @@ static void InitMotors(void);
 
 void PwmChip_Init(void)
 {
-	I2CDriver_Init();
-
 	DDRB |= (1 << 2);	// set OE to 0;
 
 	I2CDriver_Start();

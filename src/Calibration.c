@@ -9,7 +9,7 @@
  **********************************************************************************************************************/
 
 #define ACC_SENSITIVITY 0.000123f	// ( 8md/digit is what is is supposed to be. Tests revealed 1g corresponds to 1130 or so which is consistant with the +- 4g sensitivity commanded)
-#define GYRO_SENSITIVITY 0.00875		// dps/digit
+#define GYRO_SENSITIVITY 0.00875f		// dps/digit
 
 #define ACC_SLAVE_ADDRESS 0x19
 #define DEFAULT_REGISTER_VALUE 0x0
@@ -67,8 +67,8 @@ void Calibration_Calibrate(void)
 	{
 		GetRawAccData(&rawAccXData, &rawAccYData, &rawAccZData);
 		float RawAccMagnitude = sqrtf(Square(rawAccXData) + Square(rawAccYData) + Square(rawAccZData));
-		InitialAngles.x += RADIANS_TO_DEGREES * asinf((float) rawAccXData / RawAccMagnitude);
-		InitialAngles.y += RADIANS_TO_DEGREES * asinf((float) rawAccYData / RawAccMagnitude);
+		InitialAngles.x += RADIANS_TO_DEGREES * (float)asinf((float) rawAccXData / (float)RawAccMagnitude);
+		InitialAngles.y += RADIANS_TO_DEGREES * (float)asinf((float) rawAccYData / (float)RawAccMagnitude);
 	}
 	InitialAngles.x /= 100.0f;
 	InitialAngles.y /= 100.0f;

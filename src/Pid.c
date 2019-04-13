@@ -1,4 +1,12 @@
 #include "Pid.h"
+#include "LowPassFilter.h"
+
+/***********************************************************************************************************************
+ * Prototypes
+ **********************************************************************************************************************/
+
+#define MAX_VALUE_NO_SPIN	16
+#define FILTER_WINDOW_SIZE 	3
 
 /***********************************************************************************************************************
  * Variables
@@ -9,6 +17,9 @@ static float bestGuessYAngle;
 
 static float xErrorArray[5];
 static float yErrorArray[5];
+
+LowPassFilter_t GyroXFilter;
+LowPassFilter_t GyroYFilter;
 
 /***********************************************************************************************************************
  * Prototypes
@@ -26,6 +37,7 @@ static float YDifferential(void);
 static float YIntegral(void);
 
 static void ConstrainMotorRanges(float *motors);
+static bool IntegralWillWindUp(float currentIntegral, float nextSlice);
 
 /***********************************************************************************************************************
  * Code
@@ -42,24 +54,41 @@ void Pid_Init(void)
 		xErrorArray[i] = 0;
 		yErrorArray[i] = 0;
 	}
-}
 
+	LowPassFilter_Init();
+
+	GyroXFilter = LowPassFilter_CreateFilter(FILTER_WINDOW_SIZE);
+	GyroYFilter = LowPassFilter_CreateFilter(FILTER_WINDOW_SIZE);
+
+}
 
 int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, float *motors)
 {
+
+	if (PilotResult->throttlePercentage < 12)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			motors[i] = 0;   
+		}
+
+		return AAQUAD_SUCCEEDED;
+	}
+
+	float filteredXGyro = LowPassFilter_Execute(GyroXFilter, (SensorResults->xGyroRate / SensorResults->nSamples));
+	float filteredYGyro = LowPassFilter_Execute(GyroYFilter, (SensorResults->yGyroRate / SensorResults->nSamples));
 
 	for (int i = 0; i < 4; i++)
 	{
 		motors[i] = PilotResult->throttlePercentage;   
 	}
-	
 
-	float xAngleFromGyro = bestGuessXAngle + (CTRL_LOOP_PERIOD * SensorResults->xGyroRate / SensorResults->nSamples);
-	float yAngleFromGyro = bestGuessYAngle + (CTRL_LOOP_PERIOD * SensorResults->yGyroRate / SensorResults->nSamples);
+	float xAngleFromGyro = bestGuessXAngle + (CTRL_LOOP_PERIOD * filteredXGyro);
+	float yAngleFromGyro = bestGuessYAngle + (CTRL_LOOP_PERIOD * filteredYGyro);
 	float xAngleFromAcc = SensorResults->xAccAngle / SensorResults->nSamples;
 	float yAngleFromAcc = SensorResults->yAccAngle / SensorResults->nSamples;
-	bestGuessXAngle = (0.95 * xAngleFromGyro + 0.05 * xAngleFromAcc);
-	bestGuessYAngle = (0.95 * yAngleFromGyro + 0.05 * yAngleFromAcc);
+	bestGuessXAngle = (0.95f * xAngleFromGyro + 0.05f * xAngleFromAcc);
+	bestGuessYAngle = (0.95f * yAngleFromGyro + 0.05f * yAngleFromAcc);
 
 	float targetXAngle = (MAX_X_THROW / 100.0f) * PilotResult->xPercentage;
 	float targetYAngle = (MAX_Y_THROW / 100.0f) * PilotResult->yPercentage;
@@ -67,11 +96,9 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	UpdateXErrorArray(targetXAngle - bestGuessXAngle);
 	UpdateYErrorArray(targetYAngle - bestGuessYAngle);
 
-
-	float xAdjustement = ( 0.3 * XProportional() - 0.25 * XDifferential() + 0.05 * XIntegral() ) / 8.0f;
-	float yAdjustement = ( 0.3 * YProportional() - 0.25 * YDifferential() + 0.05 * YIntegral() ) / 8.0f;
-	float zAdjustement = 0.3 * PilotResult->zPercentage;
-
+	float xAdjustement = -( 0.4f * XProportional() - 0.07f * XDifferential() + 0.03f * XIntegral() ) / 3.0f;
+	float yAdjustement = -( 0.4f * YProportional() - 0.07f * YDifferential() + 0.03f * YIntegral() ) / 3.0f;
+	float zAdjustement = 0.3f * PilotResult->zPercentage;
 
 	motors[0] += xAdjustement;
 	motors[2] -= xAdjustement;
@@ -83,6 +110,9 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	motors[1] -= zAdjustement;
 	motors[2] += zAdjustement;
 	motors[3] -= zAdjustement;
+	
+	motors[0] = 5;	// disable motors 0 and 2 for this test.
+	motors[2] = 5;
 
 	ConstrainMotorRanges(motors);
 	
@@ -99,6 +129,7 @@ void Pid_CalibrateInitialAngles(InitialAngles_t *InitialAngles)
 static float XProportional(void)
 {
 	float proportional = (0.6f * xErrorArray[0] + 0.4f * xErrorArray[1] + 0.2f * xErrorArray[2] - 0.2f * xErrorArray[4] );
+
 	return proportional;
 }
 
@@ -126,8 +157,13 @@ static float YDifferential(void)
 static float XIntegral(void)
 {
 	static float integral;
-
-	integral += ( xErrorArray[0] + (4 * xErrorArray[1]) + xErrorArray[2] )* 0.833 * CTRL_LOOP_PERIOD;
+	
+	float slice = (( xErrorArray[0] + 4.0f * xErrorArray[1] + xErrorArray[2] )* 0.833f * CTRL_LOOP_PERIOD);
+	
+	if ( ! IntegralWillWindUp(integral, slice))
+	{
+		integral += slice;
+	}
 
 	return integral;
 }
@@ -136,12 +172,37 @@ static float YIntegral(void)
 {
 	static float integral;
 
-	integral += ( yErrorArray[0] + (4 * yErrorArray[1]) + yErrorArray[2] )* 0.833 * CTRL_LOOP_PERIOD;
+	float slice = (( yErrorArray[0] + 4.0f * yErrorArray[1] + yErrorArray[2] )* 0.833f * CTRL_LOOP_PERIOD);
+	
+	if ( ! IntegralWillWindUp(integral, slice))
+	{
+		integral += slice;
+	}
 
 	return integral;
 }
 
 
+static bool IntegralWillWindUp(float currentIntegral, float nextSlice)
+{
+	if (currentIntegral > 250.0f)	// check for windup
+	{
+		if (nextSlice > 0.0f)
+		{
+			return true;
+		}
+	}
+
+	else if (currentIntegral < -250.0f)
+	{
+		if (nextSlice < 0.0f)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
 
 
 

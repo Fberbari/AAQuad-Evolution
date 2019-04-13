@@ -7,6 +7,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "I2CDriver.h"
 #include "Controller.h"
 #include "Calibration.h"
 #include <stdlib.h>
@@ -43,6 +44,9 @@ int main(void)
 
 static void InitPeripherals(void)
 {
+
+	I2CDriver_Init();
+
 	// aileron
 	EIMSK |= (1 << INT0); // enable the int0 interrupt												
 	EICRA |= (1 << ISC00);	// will fire at any logical change

@@ -11,8 +11,8 @@
  * Definitions
  **********************************************************************************************************************/
 
-#define CURRENT_TEST		stepTest		// this should be the name of the array in the .h file
-#define OUTPUT_FILE_NAME 	"stepTest.csv"
+#define CURRENT_TEST		doubletTest		// this should be the name of the array in the .h file
+#define OUTPUT_FILE_NAME 	"doubletTest.csv"
 
 #define RADIANS_TO_DEGREES	57.3
 
@@ -97,8 +97,8 @@ static void GetNextPilotInstruction(PilotResult_t *PilotInstruction)
 	static int i;
 
 	PilotInstruction->throttlePercentage = THROTTLE_POWER;
-	PilotInstruction->xPercentage = CURRENT_TEST[i];
-	PilotInstruction->yPercentage = 0;
+	PilotInstruction->xPercentage = 0; 
+	PilotInstruction->yPercentage = CURRENT_TEST[i];
 	PilotInstruction->zPercentage = 0;
 
 	i++;
@@ -109,7 +109,7 @@ static void OutputToFile(PilotResult_t *PilotInstruction, SensorResults_t *QuadO
 {
 	static float time;
 
-	fprintf(fPointer, "%s %f %s %f %s %f %s %f", "\n", time, ",", (PilotInstruction->xPercentage * 0.9), ",", QuadOrientation->xAccAngle, ",", motorPercentages[0] - 50.0f);
+	fprintf(fPointer, "%s %f %s %f %s %f %s %f %s %f", "\n", time, ",", (PilotInstruction->yPercentage * 0.9), ",", QuadOrientation->yAccAngle, ",", motorPercentages[1] - 50.0f, ",", motorPercentages[3] - 50.0f);
 
 	time += CTRL_LOOP_PERIOD;
 }
@@ -121,8 +121,8 @@ static void SimulateQuadPosition(float *motorPercentages, SensorResults_t *QuadO
 
 	float angularAcceleration = GetAngularAcceleration(motorPercentages);
 
-	QuadOrientation->xAccAngle = initialAngle + (initialAngularVelocity * CTRL_LOOP_PERIOD) + ( (1/2) * angularAcceleration * pow(CTRL_LOOP_PERIOD, 2) );
-	QuadOrientation->xGyroRate = (QuadOrientation->xAccAngle - initialAngle) / CTRL_LOOP_PERIOD;
+	QuadOrientation->yAccAngle = initialAngle + (initialAngularVelocity * CTRL_LOOP_PERIOD) + ( (1/2) * angularAcceleration * pow(CTRL_LOOP_PERIOD, 2) );
+	QuadOrientation->yGyroRate = (QuadOrientation->yAccAngle - initialAngle) / CTRL_LOOP_PERIOD;
 
 
 	initialAngle = QuadOrientation->xAccAngle;
@@ -132,5 +132,5 @@ static void SimulateQuadPosition(float *motorPercentages, SensorResults_t *QuadO
 
 static float GetAngularAcceleration(float *motorPercentages)
 {
-	return RADIANS_TO_DEGREES * 2.81 * (motorPercentages[0] - motorPercentages[2]);
+	return RADIANS_TO_DEGREES * 2.81 * (motorPercentages[3] - motorPercentages[1]);
 }
