@@ -24,8 +24,8 @@ typedef enum state
  **********************************************************************************************************************/
 //#define COLLECT_SENSOR_DATA
 #ifdef COLLECT_SENSOR_DATA
-	static float xGyroReportedRate[150];
-	static float yGyroReportedRate[150];
+	static volatile float yGyroReportedRate[250];
+	//static volatile float yAccReportedAngle[250];
 #endif
 
 static Controller_State_t currentState;
@@ -104,17 +104,6 @@ static Controller_State_t GetSensorData_State(void)
 {
 	SensorData_GetResult(&SensorResults);
 
-	#ifdef COLLECT_SENSOR_DATA
-		static int i;
-		xGyroReportedRate[i] = (SensorResults.xGyroRate / SensorResults.nSamples);
-		yGyroReportedRate[i] = (SensorResults.yGyroRate / SensorResults.nSamples);
-		i++;
-		if (i == 200)
-		{
-			volatile int breakHere = 9;
-		}
-	#endif
-
 	return CTRL_GET_PILOT_RESULT;
 }
 
@@ -136,6 +125,21 @@ static Controller_State_t GetPilotResult_State(void)
 
 static Controller_State_t ProcessResults_State(void)
 {
+	
+	#ifdef COLLECT_SENSOR_DATA
+		static int i;
+		if (i < 250)
+		{
+			if(PilotResult.throttlePercentage > 20)
+			{
+				yGyroReportedRate[i] = (SensorResults.yGyroRate / SensorResults.nSamples);
+				//yAccReportedAngle[i] = (SensorResults.yAccAngle / SensorResults.nSamples);
+				i++;
+			}
+		}
+
+	#endif
+	
 	Pid_Compute(&PilotResult, &SensorResults, motors);
 
 	return CTRL_SEND_TO_PWM;

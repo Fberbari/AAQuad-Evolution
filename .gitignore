@@ -5,3 +5,4 @@ vendor
 ceedling
 PidTests/SimulationResults
 PidTests/*.out
+LowPassFilterTests/SimulationResults

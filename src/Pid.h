@@ -8,8 +8,8 @@
  **********************************************************************************************************************/
 
 // The angle that the quadCopter will be at when the control stick is at 100%
-#define MAX_X_THROW 90.0f	
-#define MAX_Y_THROW 90.0f
+#define MAX_X_THROW 15.0f	
+#define MAX_Y_THROW 15.0f
 
 
  typedef struct 

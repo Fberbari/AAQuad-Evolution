@@ -1,12 +1,13 @@
 #include "Pid.h"
 #include "LowPassFilter.h"
+#include <math.h>
 
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
-#define MAX_VALUE_NO_SPIN	16
-#define FILTER_WINDOW_SIZE 	3
+#define MAX_VALUE_NO_PROP_SPIN	16
+#define FILTER_WINDOW_SIZE 	4
 
 /***********************************************************************************************************************
  * Variables
@@ -65,7 +66,7 @@ void Pid_Init(void)
 int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, float *motors)
 {
 
-	if (PilotResult->throttlePercentage < 12)
+	if (PilotResult->throttlePercentage < 12)	// TODO make this 12 a define
 	{
 		for (int i = 0; i < 4; i++)
 		{
@@ -96,8 +97,9 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	UpdateXErrorArray(targetXAngle - bestGuessXAngle);
 	UpdateYErrorArray(targetYAngle - bestGuessYAngle);
 
-	float xAdjustement = -( 0.4f * XProportional() - 0.07f * XDifferential() + 0.03f * XIntegral() ) / 3.0f;
-	float yAdjustement = -( 0.4f * YProportional() - 0.07f * YDifferential() + 0.03f * YIntegral() ) / 3.0f;
+	
+	float xAdjustement = -( 0.4f * XProportional() - 0.1f * XDifferential() + 0.02f * XIntegral() ) / 4.0f;
+	float yAdjustement = -( 0.4f * YProportional() - 0.1f * YDifferential() + 0.02f * YIntegral() ) / 4.0f;
 	float zAdjustement = 0.3f * PilotResult->zPercentage;
 
 	motors[0] += xAdjustement;
@@ -110,9 +112,6 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	motors[1] -= zAdjustement;
 	motors[2] += zAdjustement;
 	motors[3] -= zAdjustement;
-	
-	motors[0] = 5;	// disable motors 0 and 2 for this test.
-	motors[2] = 5;
 
 	ConstrainMotorRanges(motors);
 	
@@ -136,7 +135,7 @@ static float XProportional(void)
 static float YProportional(void)
 {
 	float proportional = (0.6f * yErrorArray[0] + 0.4f * yErrorArray[1] + 0.2f * yErrorArray[2] - 0.2f * yErrorArray[4] );
-	
+
 	return proportional;
 }
 
