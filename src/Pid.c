@@ -7,7 +7,7 @@
  **********************************************************************************************************************/
 
 #define MAX_VALUE_NO_PROP_SPIN	16
-#define FILTER_WINDOW_SIZE 	4
+#define FILTER_WINDOW_SIZE 	3
 
 /***********************************************************************************************************************
  * Variables
@@ -18,6 +18,9 @@ static float bestGuessYAngle;
 
 static float xErrorArray[5];
 static float yErrorArray[5];
+
+static float previousXAdjustement;
+static float previousYAdjustement;
 
 LowPassFilter_t GyroXFilter;
 LowPassFilter_t GyroYFilter;
@@ -55,6 +58,9 @@ void Pid_Init(void)
 		xErrorArray[i] = 0;
 		yErrorArray[i] = 0;
 	}
+
+	previousYAdjustement = 0;
+	previousYAdjustement = 0;
 
 	LowPassFilter_Init();
 
@@ -97,21 +103,36 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	UpdateXErrorArray(targetXAngle - bestGuessXAngle);
 	UpdateYErrorArray(targetYAngle - bestGuessYAngle);
 
-	
+	float kp = - 0.12f;
+	float kd = - 0.025f;
+	float ki = - 0.01f;
+
+	/*
 	float xAdjustement = -( 0.4f * XProportional() - 0.1f * XDifferential() + 0.02f * XIntegral() ) / 4.0f;
 	float yAdjustement = -( 0.4f * YProportional() - 0.1f * YDifferential() + 0.02f * YIntegral() ) / 4.0f;
 	float zAdjustement = 0.3f * PilotResult->zPercentage;
+	*/
+
+	float yAdjustement = previousYAdjustement + (((kp + (kd / CTRL_LOOP_PERIOD)) * yErrorArray[0]) - ((kp + (2 * kd / CTRL_LOOP_PERIOD)) * yErrorArray[1]) + ((kd / CTRL_LOOP_PERIOD) * yErrorArray[2])) + ki * YIntegral();
+	previousYAdjustement = yAdjustement - ( ki * YIntegral());
+
+	float xAdjustement = 0;
+	float zAdjustement = 0;
+
 
 	motors[0] += xAdjustement;
 	motors[2] -= xAdjustement;
 
 	motors[1] += yAdjustement;
 	motors[3] -= yAdjustement;
-
+	
 	motors[0] += zAdjustement;
 	motors[1] -= zAdjustement;
 	motors[2] += zAdjustement;
 	motors[3] -= zAdjustement;
+
+	motors[0] = 10;
+	motors[2] = 10;
 
 	ConstrainMotorRanges(motors);
 	
@@ -171,7 +192,7 @@ static float YIntegral(void)
 {
 	static float integral;
 
-	float slice = (( yErrorArray[0] + 4.0f * yErrorArray[1] + yErrorArray[2] )* 0.833f * CTRL_LOOP_PERIOD);
+	float slice = (0.6f * yErrorArray[0] + 0.4f * yErrorArray[1] + 0.2f * yErrorArray[2] - 0.2f * yErrorArray[4] );
 	
 	if ( ! IntegralWillWindUp(integral, slice))
 	{
@@ -184,7 +205,7 @@ static float YIntegral(void)
 
 static bool IntegralWillWindUp(float currentIntegral, float nextSlice)
 {
-	if (currentIntegral > 250.0f)	// check for windup
+	if (currentIntegral > 30.0f)	// check for windup
 	{
 		if (nextSlice > 0.0f)
 		{
@@ -192,7 +213,7 @@ static bool IntegralWillWindUp(float currentIntegral, float nextSlice)
 		}
 	}
 
-	else if (currentIntegral < -250.0f)
+	else if (currentIntegral < - 30.0f)
 	{
 		if (nextSlice < 0.0f)
 		{

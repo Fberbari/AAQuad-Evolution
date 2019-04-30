@@ -1,8 +1,7 @@
 /*
- * AAQuad-Evolution.cpp
+ * AAQuad-Evolution
  *
- * Created: 2019-02-24 7:15:01 PM
- * Author : Anthony Berbari
+ * Firmware Developer : Anthony Berbari
  */ 
 
 #include <avr/io.h>

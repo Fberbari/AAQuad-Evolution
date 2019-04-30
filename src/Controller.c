@@ -3,6 +3,7 @@
 #include "SensorData.h"
 #include "PwmChip.h"
 #include "Pid.h"
+#include <avr/io.h>
 
 /***********************************************************************************************************************
  * Definitions
@@ -22,11 +23,6 @@ typedef enum state
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
-//#define COLLECT_SENSOR_DATA
-#ifdef COLLECT_SENSOR_DATA
-	static volatile float yGyroReportedRate[250];
-	//static volatile float yAccReportedAngle[250];
-#endif
 
 static Controller_State_t currentState;
 
@@ -55,6 +51,8 @@ void Controller_Init(void)
 	PwmChip_Init();
 	SensorData_Init();
 	Pid_Init();
+	
+	DDRB |= ((1 << 1) | (1 << 0));
 
 	SensorResults.xAccAngle = 0;
 	SensorResults.yAccAngle = 0;
@@ -63,7 +61,7 @@ void Controller_Init(void)
 	SensorResults.zGyroRate = 0;
 	SensorResults.nSamples = 0;
 
-	currentState = CTRL_GET_SENSOR_DATA;
+	currentState = CTRL_GET_PILOT_RESULT;
 
 }
 
@@ -72,12 +70,12 @@ void Controller_Do(void)
 	Controller_State_t nextState;
 	switch(currentState)
 	{
-		case CTRL_GET_SENSOR_DATA:
-			nextState = GetSensorData_State();
-			break;
-
 		case CTRL_GET_PILOT_RESULT:
 			nextState = GetPilotResult_State();
+			break;
+			
+		case CTRL_GET_SENSOR_DATA:
+			nextState = GetSensorData_State();
 			break;
 
 		case CTRL_PROCESS_RESULTS:
@@ -100,45 +98,33 @@ void Controller_Do(void)
 	currentState = nextState;
 }
 
-static Controller_State_t GetSensorData_State(void)
-{
-	SensorData_GetResult(&SensorResults);
-
-	return CTRL_GET_PILOT_RESULT;
-}
-
 static Controller_State_t GetPilotResult_State(void)
 {
 	int r = PilotInstructions_ComputePilotResult(&PilotResult);
 	if(r == AAQUAD_BUSY)
 	{
-		return CTRL_GET_SENSOR_DATA;
+		return CTRL_GET_PILOT_RESULT;
 	}
 
 	if(r == AAQUAD_SUCCEEDED)
 	{
-		return CTRL_PROCESS_RESULTS;
+		return CTRL_GET_SENSOR_DATA;
 	}
 
 	return CTRL_FAILED;
 }
 
+static Controller_State_t GetSensorData_State(void)
+{
+	PORTB ^= ((1 << 0) | (1 << 1));
+	
+	SensorData_GetResult(&SensorResults);
+
+	return CTRL_PROCESS_RESULTS;
+}
+
 static Controller_State_t ProcessResults_State(void)
 {
-	
-	#ifdef COLLECT_SENSOR_DATA
-		static int i;
-		if (i < 250)
-		{
-			if(PilotResult.throttlePercentage > 20)
-			{
-				yGyroReportedRate[i] = (SensorResults.yGyroRate / SensorResults.nSamples);
-				//yAccReportedAngle[i] = (SensorResults.yAccAngle / SensorResults.nSamples);
-				i++;
-			}
-		}
-
-	#endif
 	
 	Pid_Compute(&PilotResult, &SensorResults, motors);
 
@@ -161,18 +147,5 @@ static Controller_State_t ResetForNextLoop_State(void)
 	SensorResults.zGyroRate = 0;
 	SensorResults.nSamples = 0;
 
-	static int timeToReset;
-
-	if (timeToReset == 20)
-	{
-		SensorData_SensorReset();
-		timeToReset = 0;
-	}
-
-	else
-	{
-		timeToReset ++;
-	}
-
-	return CTRL_GET_SENSOR_DATA;
+	return CTRL_GET_PILOT_RESULT;
 }

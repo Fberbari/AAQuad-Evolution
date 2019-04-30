@@ -7,9 +7,11 @@
  * Definitions
  **********************************************************************************************************************/
 
-// The angle that the quadCopter will be at when the control stick is at 100%
+// The angle that the quadCopter will be at when the aileron/elevator control sticks are at 100% (in degrees)
 #define MAX_X_THROW 15.0f	
 #define MAX_Y_THROW 15.0f
+// The rotational speed that the quadCopter will be at when the rudder control stick is at 100% (in degrees/s)
+#define MAX_Z_THROW 30.0f
 
 
  typedef struct 

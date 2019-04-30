@@ -52,7 +52,7 @@ LowPassFilter_t LowPassFilter_CreateFilter(unsigned int windowSize)
 	}
 
 
-	for (int i = 0; i < windowSize; i++)
+	for (unsigned int i = 0; i < windowSize; i++)
 	{
 		Filter->pastData[i] = 0;
 	}

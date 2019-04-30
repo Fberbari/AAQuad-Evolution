@@ -25,13 +25,6 @@
 void SensorData_Init(void);
 
 /**
-* Recommended to be called every so often.
-* The Gyroscope has been observed to grow unreliable over longer periods of time.
-* This function will reset it.
-*/
-void SensorData_SensorReset(void);
-
-/**
 * Gets and accumulates the information about the quad's orientation.
 * Will update the given struct with the info without clearing it, so make sure the first call of this function is with a 0'd struct.
 * This is a blocking function that will not return until communication with the sensors either completed or failed.
