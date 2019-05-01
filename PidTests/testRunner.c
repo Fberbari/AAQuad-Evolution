@@ -19,7 +19,7 @@
 #define SIZE_OF_SIMULATION	250				// 250 pilot instruction equates to 5s
 #define THROTTLE_POWER		50
 
-#define SIZE_OF_DELAY		3
+#define SIZE_OF_DELAY		4
 
 /***********************************************************************************************************************
  * Variables
@@ -142,7 +142,7 @@ static void SimulateQuadPosition(float *motorPercentages, SensorResults_t *QuadO
 	QuadOrientation->yGyroRate = initialAngularVelocity + CTRL_LOOP_PERIOD * angularAcceleration;
 
 
-	QuadOrientation->yGyroRate += gyroNoisePropsOn[i];
+	//QuadOrientation->yGyroRate += gyroNoisePropsOn[i];
 
 	i++;
 
