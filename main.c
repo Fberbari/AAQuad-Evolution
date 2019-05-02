@@ -24,9 +24,8 @@ static void InitPeripherals(void);
 
 int main(void)
 {
-
-	Controller_Init();
 	InitPeripherals();
+	Controller_Init();
 	Calibration_Init();
 
 

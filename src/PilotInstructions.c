@@ -40,6 +40,10 @@ static uint16_t previousYTimestamp;
 static uint16_t newestZTimestamp;
 static uint16_t previousZTimestamp; 
 
+static float xZeroOffset;
+static float yZeroOffset;
+static float zZeroOffset;
+
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
@@ -73,6 +77,38 @@ void PilotInstructions_Init(void)
 	NewDataAvailable.z = false;
 }
 
+void PilotInstructions_Calibrate(void)
+{
+	PilotResult_t CalibrationZeros;
+
+	volatile int nRunsForReliableAverage = 50;
+
+	float xOffset = 0;
+	float yOffset = 0;
+	float zOffset = 0;
+
+
+	for (volatile int i = 0; i < nRunsForReliableAverage; i++)
+	{
+		while(PilotInstructions_ComputePilotResult(&CalibrationZeros) != AAQUAD_SUCCEEDED)
+		{
+			asm("nop");
+		}
+
+		xOffset += CalibrationZeros.xPercentage;
+		yOffset += CalibrationZeros.yPercentage;
+		zOffset += CalibrationZeros.zPercentage;
+	}
+
+	xOffset /= (float) nRunsForReliableAverage;
+	yOffset /= (float) nRunsForReliableAverage;
+	zOffset /= (float) nRunsForReliableAverage;
+
+	xZeroOffset = xOffset;
+	yZeroOffset = yOffset;
+	zZeroOffset = zOffset;
+}
+
 int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)
 {
 	if ( ! AllDataIsNew() )
@@ -89,9 +125,9 @@ int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)
 	}
 
 	PilotResult->throttlePercentage = ComputeThrottlePercentage(DutyCycle.throttle);
-	PilotResult->xPercentage = ComputeXPercentage(DutyCycle.x);
-	PilotResult->yPercentage = ComputeYPercentage(DutyCycle.y);
-	PilotResult->zPercentage = ComputeZPercentage(DutyCycle.z);
+	PilotResult->xPercentage = ComputeXPercentage(DutyCycle.x) - xZeroOffset;
+	PilotResult->yPercentage = ComputeYPercentage(DutyCycle.y) - yZeroOffset;
+	PilotResult->zPercentage = ComputeZPercentage(DutyCycle.z) - zZeroOffset;
 
 	SetAllDataOld();
 

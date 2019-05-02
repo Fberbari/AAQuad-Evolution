@@ -18,7 +18,7 @@
 #define AAQUAD_SUCCEEDED	1
 #define AAQUAD_FAILED 		0 
 
-#define CTRL_LOOP_PERIOD	0.02f	// in seconds
+#define CTRL_LOOP_PERIOD	0.021f	// in seconds
 
 #define TIMER_1_PRESCALER	8U
 
@@ -41,7 +41,7 @@ typedef struct
 	float yGyroRate;				// rotation speed in degrees per second (positive is motor 3 dipping down and motor 1 going up)
 	float zGyroRate;				// rotation speed in degrees per second (positive is clockwise when looking down at the quad)
 
-	uint16_t nSamples;			// the number of samples that were taking. Divide each above member by this number after all results are accumulated to get the best guesses.
+	uint16_t nSamples;				// the number of samples that were taking. Divide each above member by this number after all results are accumulated to get the best guesses.
 }SensorResults_t;
 
 /***********************************************************************************************************************

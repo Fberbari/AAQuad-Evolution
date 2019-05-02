@@ -20,6 +20,7 @@ typedef enum state
 
 }Controller_State_t;
 
+
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
@@ -52,7 +53,7 @@ void Controller_Init(void)
 	SensorData_Init();
 	Pid_Init();
 	
-	DDRB |= ((1 << 1) | (1 << 0));
+	DDRB |= ((1 << 1) | (1 << 0));	// TODO make a module for the led's
 
 	SensorResults.xAccAngle = 0;
 	SensorResults.yAccAngle = 0;
@@ -116,7 +117,6 @@ static Controller_State_t GetPilotResult_State(void)
 
 static Controller_State_t GetSensorData_State(void)
 {
-	PORTB ^= ((1 << 0) | (1 << 1));
 	
 	SensorData_GetResult(&SensorResults);
 
@@ -125,7 +125,6 @@ static Controller_State_t GetSensorData_State(void)
 
 static Controller_State_t ProcessResults_State(void)
 {
-	
 	Pid_Compute(&PilotResult, &SensorResults, motors);
 
 	return CTRL_SEND_TO_PWM;
@@ -146,6 +145,8 @@ static Controller_State_t ResetForNextLoop_State(void)
 	SensorResults.yGyroRate = 0;
 	SensorResults.zGyroRate = 0;
 	SensorResults.nSamples = 0;
+
+	PORTB ^= (1 << 0);		// indicate control loop has occured
 
 	return CTRL_GET_PILOT_RESULT;
 }

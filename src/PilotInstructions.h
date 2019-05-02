@@ -21,6 +21,14 @@
 void PilotInstructions_Init(void);
 
 /**
+* Zeros all current pilot inputs (except throttle)
+* Calling this function is optional.
+* If it is not called, any offsets in the pilot's commands will remain.
+* If it is called, it should be ensured that at the time of calling, the pilot's controls are at0 (relative to him).
+*/
+void PilotInstructions_Calibrate(void);
+
+/**
 * Gathers and processes the latest information read from the receiver, if it is available.
 * Will retun AAQUAD_SUCCEEDED if all 4 receiver channels were updated after
 * the last time the user called this function and the data was valid.
