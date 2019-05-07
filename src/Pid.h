@@ -13,14 +13,6 @@
 // The rotational speed that the quadCopter will be at when the rudder control stick is at 100% (in degrees/s)
 #define MAX_Z_THROW 90.0f	// TODO this is not reflecting reality
 
-
- typedef struct 
- {
-	float x;				
-	float y;
-
- }InitialAngles_t;
-
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
@@ -32,12 +24,12 @@
 void Pid_Init(void);
 
 /**
-* Meant To Be called by Calibration.
-* Sets the initial angle that the quad is sitting at
-* in the goal of the gyroscope measurements being used relative to it.
-* @param[in]		initialAngles 		Pointer to the inital angles struct.
+* Sets the initial angles that the quad is sitting at.
+* Tis function must be called exactly once after Pid_Init and before Pid_Compute.
+* @param[in]		initialXAngle 		The X angle the QuadCopter is at on startup.
+* @param[in]		initialYangle 		The Y angle the Quadcopter is at on startup.
 */
-void Pid_CalibrateInitialAngles(InitialAngles_t *InitialAngles);
+void Pid_SetIntialAngles(float InitialXAngle, float InitialYangle);
 
 /**
 * Combines the pilot instructions and the sensor data to compute the required power each motor must have.

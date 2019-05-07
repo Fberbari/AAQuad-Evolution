@@ -16,11 +16,21 @@
 
 #define RADIANS_TO_DEGREES 57.296f	// ratio of 180/pi
 
+typedef struct 
+{
+float xGyroRate;				
+float yGyroRate;
+float zGyroRate;
+float xAccAngle;
+float yAccAngle;
+
+}SystematicError_t;
+
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
 
-CalibratedZeros_t CalibratedZeros;
+SystematicError_t SystematicError;
 
 /***********************************************************************************************************************
  * Prototypes
@@ -52,12 +62,74 @@ void SensorData_Init(void)
 
 	I2CDriver_Start();
 	I2CDriver_SendSlaveAddressWrite(GYRO_SLAVE_ADDRESS);
-	I2CDriver_SendSlaveRegister(0x21);
+	I2CDriver_SendSlaveRegister(0x21);						// TODO too many magic numbers here
 	I2CDriver_SendData(0x03);
 	I2CDriver_Stop();
 
+	SystematicError.xGyroRate = 0.0f;
+	SystematicError.yGyroRate = 0.0f;
+	SystematicError.zGyroRate = 0.0f;
+	SystematicError.xAccAngle = 0.0f;
+	SystematicError.yAccAngle = 0.0f;
 }
 
+void SensorData_CalibrateGyro(void)
+{
+	int nRunsForReliableAverage = 100;
+	
+	int16_t rawGyroXData, rawGyroYData, rawGyroZData;
+
+	for (int i = 0; i < nRunsForReliableAverage; i++)
+	{		
+		GetRawGyroData(&rawGyroXData, &rawGyroYData, &rawGyroZData);
+		SystematicError.xGyroRate += GYRO_SENSITIVITY * (float) (rawGyroXData);
+		SystematicError.yGyroRate += GYRO_SENSITIVITY * (float) (rawGyroYData);
+		SystematicError.zGyroRate += GYRO_SENSITIVITY * (float) (rawGyroZData);
+	}
+
+	SystematicError.xGyroRate /= (float) nRunsForReliableAverage;
+	SystematicError.yGyroRate /= (float) nRunsForReliableAverage;
+	SystematicError.zGyroRate /= (float) nRunsForReliableAverage;
+}
+
+void SensorData_CalibrateAcc(void)
+{
+	int nRunsForReliableAverage = 100;
+	
+	int16_t rawAccXData, rawAccYData, rawAccZData;
+
+	for (int i = 0; i < nRunsForReliableAverage; i++)
+	{		
+		GetRawAccData(&rawAccXData, &rawAccYData, &rawAccZData);
+		float RawAccMagnitude = sqrtf(Square(rawAccXData) + Square(rawAccYData) + Square(rawAccZData));
+		SystematicError.xAccAngle += RADIANS_TO_DEGREES * (float)asinf((float) rawAccXData / (float)RawAccMagnitude);
+		SystematicError.yAccAngle += RADIANS_TO_DEGREES * (float)asinf((float) rawAccYData / (float)RawAccMagnitude);
+	}
+
+	SystematicError.xAccAngle /= (float) nRunsForReliableAverage;
+	SystematicError.yAccAngle /= (float) nRunsForReliableAverage;
+}
+
+void SensorData_GetInitialAngles(float *initialXAngle, float *initialYAngle)
+{
+	int nRunsForReliableAverage = 100;
+
+	int16_t rawAccXData, rawAccYData, rawAccZData;
+	
+	for (int i = 0; i < nRunsForReliableAverage; i++)
+	{
+		GetRawAccData(&rawAccXData, &rawAccYData, &rawAccZData);
+		float RawAccMagnitude = sqrtf(Square(rawAccXData) + Square(rawAccYData) + Square(rawAccZData));
+		*initialXAngle += RADIANS_TO_DEGREES * (float)asinf((float) rawAccXData / (float)RawAccMagnitude);
+		*initialYAngle += RADIANS_TO_DEGREES * (float)asinf((float) rawAccYData / (float)RawAccMagnitude);
+	}
+
+	*initialXAngle /= (float) nRunsForReliableAverage;
+	*initialYAngle /= (float) nRunsForReliableAverage;
+
+	*initialXAngle -= SystematicError.xAccAngle;
+	*initialYAngle -= SystematicError.yAccAngle;
+}
 
 int SensorData_GetResult(SensorResults_t *SensorResults)
 { 
@@ -70,21 +142,14 @@ int SensorData_GetResult(SensorResults_t *SensorResults)
 	SensorResults->yAccAngle += RADIANS_TO_DEGREES * (float) asinf((float) rawAccYData / (float)RawAccMagnitude);
 
 	GetRawGyroData(&rawGyroXData, &rawGyroYData, &rawGyroZData);
-	SensorResults->xGyroRate += (GYRO_SENSITIVITY * (float) (rawGyroXData)) - CalibratedZeros.xGyroRate;
-	SensorResults->yGyroRate +=(GYRO_SENSITIVITY * (float) (rawGyroYData)) - CalibratedZeros.yGyroRate;
-	SensorResults->zGyroRate += (GYRO_SENSITIVITY * (float) (rawGyroZData)) - CalibratedZeros.zGyroRate;
+	SensorResults->xGyroRate += (GYRO_SENSITIVITY * (float) (rawGyroXData)) - SystematicError.xGyroRate;
+	SensorResults->yGyroRate +=(GYRO_SENSITIVITY * (float) (rawGyroYData)) - SystematicError.yGyroRate;
+	SensorResults->zGyroRate += (GYRO_SENSITIVITY * (float) (rawGyroZData)) - SystematicError.zGyroRate;
 
 	SensorResults->nSamples ++;
 
 	return AAQUAD_SUCCEEDED;
 }
-
-void SensorData_CalibrateZeros(CalibratedZeros_t *Zeros)
-{
-	CalibratedZeros = *Zeros;
-}
-
-
 
 static int GetRawAccData(int16_t *rawAccXData, int16_t *rawAccYData, int16_t *rawAccZData)
 {

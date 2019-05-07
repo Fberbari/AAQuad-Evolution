@@ -31,12 +31,7 @@ static void UpdateXErrorArray(float currentXError);
 static void UpdateYErrorArray(float currentYError);
 static void UpdateZErrorArray(float currentZError);
 
-static float XIntegral(void);
-
-static float YIntegral(void);
-
 static void ConstrainMotorRanges(float *motors);
-static bool IntegralWillWindUp(float currentIntegral, float nextSlice);
 
 /***********************************************************************************************************************
  * Code
@@ -126,63 +121,11 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	return AAQUAD_SUCCEEDED;
 }
 
-void Pid_CalibrateInitialAngles(InitialAngles_t *InitialAngles)
+void Pid_SetIntialAngles(float InitialXAngle, float InitialYangle)
 {
-	bestGuessXAngle = InitialAngles->x;
-	bestGuessYAngle = InitialAngles->y;
+	bestGuessXAngle = InitialXAngle;
+	bestGuessYAngle = InitialYangle;
 }
-
-static float XIntegral(void)
-{
-	static float integral;
-	
-	float slice = (( xErrorArray[0] + 4.0f * xErrorArray[1] + xErrorArray[2] )* 0.833f * CTRL_LOOP_PERIOD);
-	
-	if ( ! IntegralWillWindUp(integral, slice))
-	{
-		integral += slice;
-	}
-
-	return integral;
-}
-
-static float YIntegral(void)
-{
-	static float integral;
-
-	float slice = (0.6f * yErrorArray[0] + 0.4f * yErrorArray[1] + 0.2f * yErrorArray[2] - 0.2f * yErrorArray[4] );
-	
-	if ( ! IntegralWillWindUp(integral, slice))
-	{
-		integral += slice;
-	}
-
-	return integral;
-}
-
-
-static bool IntegralWillWindUp(float currentIntegral, float nextSlice)
-{
-	if (currentIntegral > 40.0f)	// check for windup
-	{
-		if (nextSlice > 0.0f)
-		{
-			return true;
-		}
-	}
-
-	else if (currentIntegral < - 40.0f)
-	{
-		if (nextSlice < 0.0f)
-		{
-			return true;
-		}
-	}
-	
-	return false;
-}
-
-
 
 
 static void UpdateXErrorArray(float currentXError)

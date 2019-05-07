@@ -26,11 +26,8 @@ int main(void)
 {
 	InitPeripherals();
 	Controller_Init();
-	Calibration_Init();
-
 
 	Calibration_Calibrate();
-
 	
     while (1) 
     {

@@ -23,8 +23,9 @@ void PilotInstructions_Init(void);
 /**
 * Zeros all current pilot inputs (except throttle)
 * Calling this function is optional.
-* If it is not called, any offsets in the pilot's commands will remain.
-* If it is called, it should be ensured that at the time of calling, the pilot's controls are at0 (relative to him).
+* If it is not called, any systematic error in the pilot's commands will remain.
+* If it is called, it should be ensured that at the time of calling, the pilot's controls are at 0 (relative to him).
+* Note: If trim is used, this function should not be called, as trim on any of the channels will be zeroed.
 */
 void PilotInstructions_Calibrate(void);
 

@@ -19,7 +19,7 @@ void Controller_Init(void);
 
 /**
 * Executes a cycle of controller.
-* Meant to be calledin an infinite loop.
+* Meant to be called in an infinite loop.
 */
 void Controller_Do(void);
 

@@ -3,7 +3,7 @@
 #include "SensorData.h"
 #include "PwmChip.h"
 #include "Pid.h"
-#include <avr/io.h>
+#include "Leds.h"
 
 /***********************************************************************************************************************
  * Definitions
@@ -52,8 +52,7 @@ void Controller_Init(void)
 	PwmChip_Init();
 	SensorData_Init();
 	Pid_Init();
-	
-	DDRB |= ((1 << 1) | (1 << 0));	// TODO make a module for the led's
+	Leds_Init();
 
 	SensorResults.xAccAngle = 0;
 	SensorResults.yAccAngle = 0;
@@ -146,7 +145,7 @@ static Controller_State_t ResetForNextLoop_State(void)
 	SensorResults.zGyroRate = 0;
 	SensorResults.nSamples = 0;
 
-	PORTB ^= (1 << 0);		// indicate control loop has occured
+	Leds_ToggleLed0();
 
 	return CTRL_GET_PILOT_RESULT;
 }
