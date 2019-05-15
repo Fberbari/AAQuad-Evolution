@@ -22,7 +22,7 @@ Directories
 - The design folder contains early notes and ideas about the problems posed and their solutions.
 - the Stimuli folder contains stimulus test cases used to test the external and pin-change interrupts early on.
 - The PidTests folder contains a simulation framework I built in C to test the PID algorythms aswell as a basic physical analysis of the Quadcopter.
--The schematics folder contains the KiCad design files for the current PCB aswell as some pdf's of the schematics.
+- The schematics folder contains the KiCad design files for the current PCB aswell as some pdf's of the schematics.
 
 
 
