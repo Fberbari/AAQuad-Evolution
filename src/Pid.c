@@ -91,7 +91,7 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	float xykp = 0.125f;
 	float xykd = 0.025f;
 
-	float zkp = 0.1;
+	float zkp = 0.15;
 	float zkd = 0.015;
 
 	float xAdjustement = previousXAdjustement + (((xykp + (xykd / CTRL_LOOP_PERIOD)) * xErrorArray[0]) - ((xykp + (2 * xykd / CTRL_LOOP_PERIOD)) * xErrorArray[1]) + ((xykd / CTRL_LOOP_PERIOD) * xErrorArray[2]));

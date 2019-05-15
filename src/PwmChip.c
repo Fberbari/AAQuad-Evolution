@@ -4,12 +4,18 @@
 #include <avr/io.h>
 
 /***********************************************************************************************************************
+ * Definitions
+ **********************************************************************************************************************/
+
+#define MOTOR_VALUE_NO_SPIN		8.0f 	// 0 should not be used as a small electrical glitc may produce an undefined (negative) signal and confuse the esc's
+
+/***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
 static void encode_motors(uint8_t motor, float* motors, uint8_t* instruction);
 
-static void InitMotors(void);
+static void InitMotorsToZero(void);
 
 /***********************************************************************************************************************
  * Code
@@ -29,7 +35,7 @@ void PwmChip_Init(void)
 	I2CDriver_SendData(0x21); //clock on, autoincrement enable
 	I2CDriver_Stop();
 
-	InitMotors();
+	InitMotorsToZero();
 
 }
 
@@ -109,6 +115,13 @@ static void encode_motors(uint8_t motor, float* motors, uint8_t* instruction)
 
 
 
-static void InitMotors(void)
+static void InitMotorsToZero(void)
 {
+	float motors[4];
+	for (int i = 0; i < 4; i++)
+	{
+		motors[i] = MOTOR_VALUE_NO_SPIN;
+	}
+
+	PwmChip_Send(motors);
 }
