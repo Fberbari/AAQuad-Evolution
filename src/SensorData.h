@@ -13,30 +13,20 @@
 void SensorData_Init(void);
 
 /**
+* Should be called once right after Init.
+* Uses the values of the members of SensorResuts to set a 0 baseline to remove systematic error associated.
+* If it is not called, the module will assume there are no errors.
+* @param[in]	CalibratedZeros 		struct that contains actual values of the Sensor channels that correspond to a level Quad position with no motion in any axis.
+*/
+void SensorData_LoadCalibration(SensorResults_t *CalibratedZeros);
+
+/**
 * Gives the Initial Angle of the Quad.
-* This result is this function is called when the quad is motionless in every axis.
+* This result of this function is only valid if it is called when the quad is motionless in every axis.
 * @ param[out]		initialXAngle		The intial x Angle of the qudcopter
 * @ param[out]		initialYAngle		The intial y Angle of the qudcopter
 */
 void SensorData_GetInitialAngles(float *initialXAngle, float *initialYAngle);
-
-/**
-* Zeros the current Gyroscope Data.
-* Calling this function is optional.
-* If it is not called, any systematic error in the gyro Data will remain.
-* If it is called, it should be ensured that at the time of calling, the Quad is not moving in any axis.
-*/
-void SensorData_CalibrateGyro(void);
-
-/**
-* Zeros the current Accelerometer Data.
-* Calling this function is optional.
-* If it is not called, any systematic error in the Accelerometer Data will remain.
-* If it is called, it should be ensured that at the time of calling, the Quad is not moving in
-* any axis and pointing straight up, so that it can be set to 1g on the z axis and 0g's on the x and y.
-*/
-void SensorData_CalibrateAcc(void);
-
 
 /**
 * Gets and accumulates the information about the quad's orientation.

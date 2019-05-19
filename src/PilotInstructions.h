@@ -21,13 +21,12 @@
 void PilotInstructions_Init(void);
 
 /**
-* Zeros all current pilot inputs (except throttle)
-* Calling this function is optional.
-* If it is not called, any systematic error in the pilot's commands will remain.
-* If it is called, it should be ensured that at the time of calling, the pilot's controls are at 0 (relative to him).
-* Note: If trim is used, this function should not be called, as trim on any of the channels will be zeroed.
+* Should called once right after Init.
+* Uses the values of the members of pilot result to set a 0 baseline to remove systematic error.
+* If it is not called, the module will assume there are no errors.
+* @param[in]	CalibratedZeros 		struct that contains actual values of the pilot channels that correspond to a pilot intention of 0.
 */
-void PilotInstructions_Calibrate(void);
+void PilotInstructions_LoadCalibration(PilotResult_t *CalibratedZeros);
 
 /**
 * Gathers and processes the latest information read from the receiver, if it is available.

@@ -41,7 +41,7 @@ static uint16_t newestZTimestamp;
 static uint16_t previousZTimestamp; 
 
 static float xZeroOffset;
-static float yZeroOffset;
+static float yZeroOffset;	// TODO I'd like to see this be a struct
 static float zZeroOffset;
 
 /***********************************************************************************************************************
@@ -75,38 +75,17 @@ void PilotInstructions_Init(void)
 	NewDataAvailable.x = false;
 	NewDataAvailable.y = false;
 	NewDataAvailable.z = false;
+
+	xZeroOffset = 0.0f;
+	yZeroOffset = 0.0f;
+	zZeroOffset = 0.0f;
 }
 
-void PilotInstructions_Calibrate(void)
+void PilotInstructions_LoadCalibration(PilotResult_t *CalibratedZeros)
 {
-	PilotResult_t CalibrationZeros;
-
-	volatile int nRunsForReliableAverage = 50;
-
-	float xOffset = 0;
-	float yOffset = 0;
-	float zOffset = 0;
-
-
-	for (volatile int i = 0; i < nRunsForReliableAverage; i++)
-	{
-		while(PilotInstructions_ComputePilotResult(&CalibrationZeros) != AAQUAD_SUCCEEDED)
-		{
-			asm("nop");
-		}
-
-		xOffset += CalibrationZeros.xPercentage;
-		yOffset += CalibrationZeros.yPercentage;
-		zOffset += CalibrationZeros.zPercentage;
-	}
-
-	xOffset /= (float) nRunsForReliableAverage;
-	yOffset /= (float) nRunsForReliableAverage;
-	zOffset /= (float) nRunsForReliableAverage;
-
-	xZeroOffset = xOffset;
-	yZeroOffset = yOffset;
-	zZeroOffset = zOffset;
+	xZeroOffset = CalibratedZeros->xPercentage;
+	yZeroOffset = CalibratedZeros->yPercentage;
+	zZeroOffset = CalibratedZeros->zPercentage;
 }
 
 int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)

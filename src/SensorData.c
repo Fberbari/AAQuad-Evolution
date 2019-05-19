@@ -73,41 +73,13 @@ void SensorData_Init(void)
 	SystematicError.yAccAngle = 0.0f;
 }
 
-void SensorData_CalibrateGyro(void)
+void SensorData_LoadCalibration(SensorResults_t *CalibratedZeros)
 {
-	int nRunsForReliableAverage = 100;
-	
-	int16_t rawGyroXData, rawGyroYData, rawGyroZData;
-
-	for (int i = 0; i < nRunsForReliableAverage; i++)
-	{		
-		GetRawGyroData(&rawGyroXData, &rawGyroYData, &rawGyroZData);
-		SystematicError.xGyroRate += GYRO_SENSITIVITY * (float) (rawGyroXData);
-		SystematicError.yGyroRate += GYRO_SENSITIVITY * (float) (rawGyroYData);
-		SystematicError.zGyroRate += GYRO_SENSITIVITY * (float) (rawGyroZData);
-	}
-
-	SystematicError.xGyroRate /= (float) nRunsForReliableAverage;
-	SystematicError.yGyroRate /= (float) nRunsForReliableAverage;
-	SystematicError.zGyroRate /= (float) nRunsForReliableAverage;
-}
-
-void SensorData_CalibrateAcc(void)
-{
-	int nRunsForReliableAverage = 100;
-	
-	int16_t rawAccXData, rawAccYData, rawAccZData;
-
-	for (int i = 0; i < nRunsForReliableAverage; i++)
-	{		
-		GetRawAccData(&rawAccXData, &rawAccYData, &rawAccZData);
-		float RawAccMagnitude = sqrtf(Square(rawAccXData) + Square(rawAccYData) + Square(rawAccZData));
-		SystematicError.xAccAngle += RADIANS_TO_DEGREES * (float)asinf((float) rawAccXData / (float)RawAccMagnitude);
-		SystematicError.yAccAngle += RADIANS_TO_DEGREES * (float)asinf((float) rawAccYData / (float)RawAccMagnitude);
-	}
-
-	SystematicError.xAccAngle /= (float) nRunsForReliableAverage;
-	SystematicError.yAccAngle /= (float) nRunsForReliableAverage;
+	SystematicError.xGyroRate = CalibratedZeros->xGyroRate;
+	SystematicError.yGyroRate = CalibratedZeros->yGyroRate;
+	SystematicError.zGyroRate = CalibratedZeros->zGyroRate;
+	SystematicError.xAccAngle = CalibratedZeros->xAccAngle;
+	SystematicError.yAccAngle = CalibratedZeros->yAccAngle;
 }
 
 void SensorData_GetInitialAngles(float *initialXAngle, float *initialYAngle)
