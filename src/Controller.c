@@ -56,15 +56,7 @@ void Controller_Init(void)
 	Pid_Init();
 	Leds_Init();
 
-	SensorResults.xAccAngle = 0;
-	SensorResults.yAccAngle = 0;
-	SensorResults.xGyroRate = 0;
-	SensorResults.yGyroRate = 0;
-	SensorResults.zGyroRate = 0;
-	SensorResults.nSamples = 0;
-
 	currentState = CTRL_GET_PILOT_RESULT;
-
 }
 
 void Controller_Do(void)
@@ -140,13 +132,6 @@ static Controller_State_t SendToPwm_State(void)
 
 static Controller_State_t ResetForNextLoop_State(void)
 {
-	SensorResults.xAccAngle = 0;
-	SensorResults.yAccAngle = 0;
-	SensorResults.xGyroRate = 0;
-	SensorResults.yGyroRate = 0;
-	SensorResults.zGyroRate = 0;
-	SensorResults.nSamples = 0;
-
 	ManageLeds();
 
 	return CTRL_GET_PILOT_RESULT;

@@ -8,7 +8,7 @@
 #include <avr/eeprom.h>
 
 /***********************************************************************************************************************
- * Prototypes
+ * Defines
  **********************************************************************************************************************/
 
 #define EEPROM_START_ADDRESS	(const uint8_t *) 0x0
@@ -47,8 +47,8 @@ void Calibration_Calibrate(void)
 
 	LoadCalibration();
 
-	float initialXAngle = 0.0f;
-	float initialYAngle = 0.0f;
+	float initialXAngle;
+	float initialYAngle;
 	SensorData_GetInitialAngles(&initialXAngle, &initialYAngle);
 	Pid_SetIntialAngles(initialXAngle, initialYAngle);
 }
@@ -106,7 +106,7 @@ void GetCalibration(PilotResult_t *PilotCalibration, SensorResults_t *SensorCali
 	PilotResult_t tempPilotResult = {0};
 	SensorResults_t tempSensorResult = {0};
 
-	const uint8_t nSamplesForReliableAverage = 25;
+	const uint8_t nSamplesForReliableAverage = 100;
 
 	for (int i = 0; i < nSamplesForReliableAverage; i++)
 	{

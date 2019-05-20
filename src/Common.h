@@ -40,8 +40,7 @@ typedef struct
 	float xGyroRate;				// rotation speed in degrees per second (positive is motor 2 dipping down and motor 0 going up)
 	float yGyroRate;				// rotation speed in degrees per second (positive is motor 3 dipping down and motor 1 going up)
 	float zGyroRate;				// rotation speed in degrees per second (positive is clockwise when looking down at the quad)
-
-	uint16_t nSamples;				// the number of samples that were taking. Divide each above member by this number after all results are accumulated to get the best guesses.
+	
 }SensorResults_t;
 
 /***********************************************************************************************************************

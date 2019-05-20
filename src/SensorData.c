@@ -6,7 +6,7 @@
 /***********************************************************************************************************************
  * Definitions
  **********************************************************************************************************************/
-#define ACC_SENSITIVITY 0.000123f	// ( 8md/digit is what is is supposed to be. Tests revealed 1g corresponds to 1130 or so which is consistant with the +- 4g sensitivity commanded)
+#define ACC_SENSITIVITY 0.000123f		// ( 8md/digit is what is is supposed to be. Tests revealed 1g corresponds to 1130 or so which is consistant with the +- 4g sensitivity commanded)
 #define GYRO_SENSITIVITY 0.00875f		// dps/digit
 
 #define ACC_SLAVE_ADDRESS 0x19
@@ -84,6 +84,9 @@ void SensorData_LoadCalibration(SensorResults_t *CalibratedZeros)
 
 void SensorData_GetInitialAngles(float *initialXAngle, float *initialYAngle)
 {
+	*initialXAngle = 0.0f;
+	*initialYAngle = 0.0f;
+
 	int nRunsForReliableAverage = 100;
 
 	int16_t rawAccXData, rawAccYData, rawAccZData;
@@ -117,8 +120,6 @@ int SensorData_GetResult(SensorResults_t *SensorResults)
 	SensorResults->xGyroRate = (GYRO_SENSITIVITY * (float) (rawGyroXData)) - SystematicError.xGyroRate;
 	SensorResults->yGyroRate =(GYRO_SENSITIVITY * (float) (rawGyroYData)) - SystematicError.yGyroRate;
 	SensorResults->zGyroRate = (GYRO_SENSITIVITY * (float) (rawGyroZData)) - SystematicError.zGyroRate;
-
-	SensorResults->nSamples = 1;
 
 	return AAQUAD_SUCCEEDED;
 }

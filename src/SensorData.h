@@ -23,15 +23,15 @@ void SensorData_LoadCalibration(SensorResults_t *CalibratedZeros);
 /**
 * Gives the Initial Angle of the Quad.
 * This result of this function is only valid if it is called when the quad is motionless in every axis.
-* @ param[out]		initialXAngle		The intial x Angle of the qudcopter
-* @ param[out]		initialYAngle		The intial y Angle of the qudcopter
+* @ param[out]		initialXAngle		The intial x Angle of the quadcopter
+* @ param[out]		initialYAngle		The intial y Angle of the quadcopter
 */
 void SensorData_GetInitialAngles(float *initialXAngle, float *initialYAngle);
 
 /**
-* Gets and the information about the quad's orientation.
+* Gets the information about the quad's orientation.
 * This is a blocking function that will not return until communication with the sensors either completed or failed.
-* Returns succeeded if the data was successfully brought in and computed, returns failed otherwise.
+* Returns succeeded if the data was successfully collected and computed, returns failed otherwise.
 * @param[in & out]		SensorResults 		pointer to the results struct
 * @return			AAQUAD_SUCCEEDED or AAQUAD_FAILED
 */
