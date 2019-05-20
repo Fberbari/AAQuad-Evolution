@@ -3,8 +3,8 @@
 #include "PilotInstructions.h"
 #include "Pid.h"
 #include "Leds.h"
+#include "Common.h"
 
-#include <util/delay.h>
 #include <avr/eeprom.h>
 
 /***********************************************************************************************************************
@@ -84,9 +84,8 @@ void WaitUntilPilotReady(void)
 			asm("nop");
 		}
 		
-	} while ( PilotInput.throttlePercentage > 50);
+	} while ( PilotInput.throttlePercentage > MAX_VALUE_NO_PROP_SPIN);
 
-	 _delay_ms( (double) 500.0);	// ensure pilot has gotten all control sticks to what he intends to be the 0 position
 
 }
 

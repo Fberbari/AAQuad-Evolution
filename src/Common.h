@@ -22,6 +22,7 @@
 
 #define TIMER_1_PRESCALER	8U
 
+#define MAX_VALUE_NO_PROP_SPIN	12
 
 typedef struct
 {
