@@ -42,6 +42,8 @@ static Controller_State_t ProcessResults_State(void);
 static Controller_State_t SendToPwm_State(void);
 static Controller_State_t ResetForNextLoop_State(void);
 
+static void ManageLeds(void);
+
 /***********************************************************************************************************************
  * Code
  **********************************************************************************************************************/
@@ -145,7 +147,20 @@ static Controller_State_t ResetForNextLoop_State(void)
 	SensorResults.zGyroRate = 0;
 	SensorResults.nSamples = 0;
 
-	Leds_ToggleLed0();
+	ManageLeds();
 
 	return CTRL_GET_PILOT_RESULT;
+}
+
+static void ManageLeds(void)
+{
+	static int i;
+	
+	if (i == 10)
+	{
+		Leds_ToggleLed0();	
+		i = 0;
+	}
+	
+	i++;
 }

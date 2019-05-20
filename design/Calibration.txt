@@ -1,0 +1,16 @@
+
+
+
+
+tests:
+
+	1. If pilot does not raise throttle, calibration is not saved. 				P
+	2. if pilot raises throttle, go to try saving calibration.					P
+	3. Wait until Pilot Lowers Throttle.										P
+	3. In saving a calibration, correct data is gathered from the sensors.		P
+	4. It is written to eeprom.													P
+	5. In loading calibration, correct data is gathered from eeprom.			P
+	6. In loading calibration, correct dta is written to the module.			P
+
+Caveats:
+	1. It is quite possible that the very first pilot reading is the one used. does this work ?		P

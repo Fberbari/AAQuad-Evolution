@@ -29,8 +29,7 @@ void SensorData_LoadCalibration(SensorResults_t *CalibratedZeros);
 void SensorData_GetInitialAngles(float *initialXAngle, float *initialYAngle);
 
 /**
-* Gets and accumulates the information about the quad's orientation.
-* Will update the given struct with the info without clearing it, so make sure the first call of this function is with a 0'd struct.
+* Gets and the information about the quad's orientation.
 * This is a blocking function that will not return until communication with the sensors either completed or failed.
 * Returns succeeded if the data was successfully brought in and computed, returns failed otherwise.
 * @param[in & out]		SensorResults 		pointer to the results struct
