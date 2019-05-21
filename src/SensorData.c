@@ -113,8 +113,8 @@ int SensorData_GetResult(SensorResults_t *SensorResults)
 
 	GetRawAccData(&rawAccXData, &rawAccYData, &rawAccZData);
 	float RawAccMagnitude = sqrtf(Square(rawAccXData) + Square(rawAccYData) + Square(rawAccZData));
-	SensorResults->xAccAngle = RADIANS_TO_DEGREES * (float) asinf((float) rawAccXData / (float)RawAccMagnitude);
-	SensorResults->yAccAngle = RADIANS_TO_DEGREES * (float) asinf((float) rawAccYData / (float)RawAccMagnitude);
+	SensorResults->xAccAngle = RADIANS_TO_DEGREES * (float) asinf((float) rawAccXData / (float)RawAccMagnitude) - SystematicError.xAccAngle;
+	SensorResults->yAccAngle = RADIANS_TO_DEGREES * (float) asinf((float) rawAccYData / (float)RawAccMagnitude) - SystematicError.yAccAngle;
 
 	GetRawGyroData(&rawGyroXData, &rawGyroYData, &rawGyroZData);
 	SensorResults->xGyroRate = (GYRO_SENSITIVITY * (float) (rawGyroXData)) - SystematicError.xGyroRate;
