@@ -55,7 +55,7 @@ int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, floa
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			motors[i] = 0;   
+			motors[i] = MOTOR_VALUE_NO_SPIN;   
 		}
 
 		return AAQUAD_SUCCEEDED;

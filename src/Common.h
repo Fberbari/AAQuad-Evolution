@@ -22,7 +22,8 @@
 
 #define TIMER_1_PRESCALER	8U
 
-#define MAX_VALUE_NO_PROP_SPIN	12
+#define MAX_VALUE_NO_PROP_SPIN	12.0f
+#define MOTOR_VALUE_NO_SPIN		2.0f 	// 0 should not be used as a small electrical glitc may produce an undefined (negative) signal and confuse the esc's
 
 typedef struct
 {

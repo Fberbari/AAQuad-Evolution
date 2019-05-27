@@ -47,8 +47,7 @@ void Calibration_Calibrate(void)
 
 	LoadCalibration();
 
-	float initialXAngle;
-	float initialYAngle;
+	float initialXAngle, initialYAngle;
 	SensorData_GetInitialAngles(&initialXAngle, &initialYAngle);
 	Pid_SetIntialAngles(initialXAngle, initialYAngle);
 }
@@ -64,7 +63,7 @@ bool CalibrationRequested(void)
 
 	// TODO failure case ?
 
-	if(InitialPilotInput.throttlePercentage > 50)
+	if(InitialPilotInput.throttlePercentage > 50.0f)
 	{
 		return true;
 	}
