@@ -141,9 +141,6 @@ int I2CDriver_WaitForNextReadByte(void)
 	}
 
 	return AAQUAD_SUCCEEDED;
-
-
-
 }
 
 int I2CDriver_EndDataRead(void)

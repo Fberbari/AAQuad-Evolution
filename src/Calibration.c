@@ -108,7 +108,11 @@ void GetCalibration(PilotResult_t *PilotCalibration, SensorResults_t *SensorCali
 
 	for (int i = 0; i < nSamplesForReliableAverage; i++)
 	{
-		PilotInstructions_ComputePilotResult(&tempPilotResult);
+		while ( PilotInstructions_ComputePilotResult(&tempPilotResult) == AAQUAD_BUSY)
+		{
+			asm("nop");
+		}
+
 		SensorData_GetResult(&tempSensorResult);
 
 		SensorCalibration->xAccAngle += tempSensorResult.xAccAngle;
