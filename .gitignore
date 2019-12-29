@@ -3,6 +3,3 @@ test-build
 UnitTests/support
 vendor
 ceedling
-PidTests/SimulationResults
-PidTests/*.out
-LowPassFilterTests/SimulationResults
