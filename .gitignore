@@ -1,4 +1,9 @@
-build
+build/.vs
+build/bin
+build/Debug
+build/Release
+build/src
+build/AAQuad-Evoution.componentinfo.xml
 test-build
 UnitTests/support
 vendor
