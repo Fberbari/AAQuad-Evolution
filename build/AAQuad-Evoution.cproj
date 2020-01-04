@@ -26,7 +26,7 @@
     <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
     <ResetRule>0</ResetRule>
-    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <eraseonlaunchrule>1</eraseonlaunchrule>
     <EraseKey />
     <avrtool>com.atmel.avrdbg.tool.atmelice</avrtool>
     <avrtoolserialnumber>J41800090992</avrtoolserialnumber>
@@ -36,13 +36,13 @@
         <InterfaceProperties>
           <IspClock>25000</IspClock>
         </InterfaceProperties>
-        <InterfaceName>ISP</InterfaceName>
+        <InterfaceName>debugWIRE</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
       <ToolNumber>J41800090992</ToolNumber>
       <ToolName>Atmel-ICE</ToolName>
     </com_atmel_avrdbg_tool_atmelice>
-    <avrtoolinterface>ISP</avrtoolinterface>
+    <avrtoolinterface>debugWIRE</avrtoolinterface>
     <avrtoolinterfaceclock>25000</avrtoolinterfaceclock>
     <AsfFrameworkConfig>
       <framework-data xmlns="">
@@ -83,7 +83,6 @@
   <avrgcc.compiler.symbols.DefSymbols>
     <ListValues>
       <Value>NDEBUG</Value>
-      <Value>F_CPU 20000000UL</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
@@ -132,7 +131,6 @@
   <avrgcc.compiler.symbols.DefSymbols>
     <ListValues>
       <Value>DEBUG</Value>
-      <Value>F_CPU 20000000UL</Value>
     </ListValues>
   </avrgcc.compiler.symbols.DefSymbols>
   <avrgcc.compiler.directories.IncludePaths>
@@ -320,6 +318,20 @@
     <Compile Include="..\src\SensorData.h">
       <SubType>compile</SubType>
       <Link>src\SensorData.h</Link>
+    </Compile>
+    <Compile Include="..\src\SPI.c">
+      <SubType>compile</SubType>
+      <Link>src\SPI.c</Link>
+    </Compile>
+    <Compile Include="..\src\SPI.h">
+      <SubType>compile</SubType>
+      <Link>src\SPI.h</Link>
+    </Compile>
+    <Compile Include="src\Imu.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\Imu.h">
+      <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
