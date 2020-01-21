@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name AAquad_PCB-rescue)(type Legacy)(uri ${KIPRJMOD}/AAquad_PCB-rescue.lib)(options "")(descr ""))
+)
