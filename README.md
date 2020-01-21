@@ -4,45 +4,26 @@
 
 What is this project ?
 
-	The AAQuad-Evolution is a flight computer I've built to control a Quadcopter. 
-	It is NOT autonomous and requires pilot input to operate, the computer only takes care of continued stabilisation in flight. 
-	It includes Hardware design of a custom PCB, all the C code that runs on the Atmega328pb processor and a PID test framework which can be used to tune the algorithm to different mechanical constructions. 
-	It is a remake of the Original AAQuad project, which was written in C++. That project became unmanageable due to poor design, testing and implementation.
-
+	The AAQuad-Evolution is a flight computer I've built to control a Quadcopter. Flight is something of a passion of mine and this long running project has been a great opportunity to keep implementing some cool things I learn as I progress in my schooling and career.
+	It is currently not autonomous and requires pilot input to operate, the computer currently only takes care of continued stabilisation in flight. 
+	It includes Hardware design of a custom PCB, all the C code that runs on the Atmega328pb processor and simulink simulations used to design and tune the pid algorithms.
+	It is the successor of the Original AAQuad project. That project became unmanageable due to poor design and testing practices.
 
 
 Directories
 
 	- All C code is contained in the src directory with the exception of main.c which is in the root directory.
-	- The schematics folder contains the KiCad design files for the current PCB aswell as some PDF's of the schematics and layout.
-	- The PidTests folder contains a simulation framework I built in C to test the PID algorithms aswell as a physical analysis of my Quadcopter.
-	- The UnitTests folder contains the source code for all unit tests performed. These are run by ceedling which is managed by the project.yml file in the root directory.
+	- The PCB folder contains the KiCad design files and some pictures of the finished PCBs.
+	- The MatlabModel folder contains the simulink models for the quadcopter.
 	- The design folder contains some notes and ideas about the problems posed and their solutions aswell as little plans of execution.
 	- the Stimuli folder contains stimulus test cases used to test the external and pin-change interrupts to ensure proper operation of the PilotInstructions module.
 
+Progression
 
-
-
-User instructions 
-
-	Operation mode
-
-		- In operation mode, the quad is flying, or ready to fly. This mode is indicated by a flashing green LED on the circuit board.
-		The following controls are available in operation mode :
-		- The pilot uses the aileron stick to control rotation in the y axis. Each position of the stick is matched to a specific angle, which the computer will attempt to achieve. The default position maps to level.
-		- The pilot uses the elevator stick to control rotation in the x axis. Each position of the stick is matched to a specific angle, which the computer will attempt to achieve. The default position maps to level.
-		- The pilot uses the rudder stick to control rotation speed in the z axis. each position of the stick matches to a specific angular velocity (in degrees / s) which the computer will attempt to achieve.The default position maps to 0 degrees/ second.
-		- The pilot uses the throttle stick to control the average power of the 4 motors (as of right now, there are no sensors on board to aid in this process)
-
-
-	Calibration mode
-
-		- There exists a mode in which the sensors recalibrate themselves in an effort to eliminate all systematic error. To enter this mode, the pilot must place his throttle stick to maximum before plugging in the battery.
-		- To indicate successfull entering of Calibration mode, a single green LED will be solid on the circuit board.
-		- While the green LED is solid, the pilot should ensure that the quad is in a level position and is not moving in any axis. He should also ensure that all sticks on his radio, except throttle, are at their default position and that there is no trim on any channel.
-		- Once the above step is complete, the pilot should lower his throttle stick back to 0. After a slight delay, the green LED will begin flashing, indicating that the calibration was successfully saved and that the quad has transitioned to Operation mode.
-
-
+	- The current state of the project is one where I am converting the matlab pid models into C code and integrating that with the rest of the modules.
+	- The drivers for the IMU, ultrasonic distance sensor, PWM chip and receiver for the newest itteration of the PCB are completed and have all been tested.
+	- Because the integration is not complete at this time, the code on the master branch will currently not be able to fly the newest AAQUAD.
+	- The last working version can be seen at this commit https://github.com/Fberbari/AAQuad-Evolution/tree/36f1a275297e55dd9b30459dbdbe85f911d86360. Everything ran on the version 2 hardware. At that time, the flight computer could keep the quadcopter relatively stable in hover, but had trouble steering the aircraft.These problems are being delt with with the updated PID algorithms.
 
 ## Developer: Anthony Berbari
 
