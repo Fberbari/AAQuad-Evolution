@@ -3,9 +3,9 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define SPEED_OF_SOUND 340  // m/s
+#define SPEED_OF_SOUND 340.0f  // m/s
 
-#define SECONDS_PER_TICK (1 / F_CPU)    // assuming timer has no presaler
+#define SECONDS_PER_TICK ((float)(1.0f / F_CPU))    // assuming timer has no presaler
 
 #define TRIG_PIN 1
 
@@ -28,12 +28,12 @@ static bool dataReady;
 void Altitude_Init(void)
 {
     // timer 0 used to manage the trigger pulse
-    // interrupts are iniatialised but the counter is not started yet
+    // interrupts are initialised but the counter is not started yet
 	TIMSK0 = (1 << OCIE0A);
     OCR0A = TIMER_VAL_11_US;
 
-    // timer 2 used to measure the length of the echo pulse
-    TCCR2B = (1 << CS20);
+    // timer 3 used to measure the length of the echo pulse
+    TCCR3B = (1 << CS30);
 
     DDRB |= (1 << TRIG_PIN);
     PORTB &= ~(1 << TRIG_PIN);
@@ -75,7 +75,7 @@ ISR(PCINT0_vect)
     static uint16_t previousTimestamp;
     static bool isFallingEdge;
 
-    uint16_t thisTimestamp = TCNT2;
+    uint16_t thisTimestamp = TCNT3;
 
     int32_t counter = thisTimestamp - previousTimestamp;
 
@@ -83,8 +83,8 @@ ISR(PCINT0_vect)
 
     if (isFallingEdge == true)
     {
-        volatile float secondsOfTravel = fabs( counter * SECONDS_PER_TICK);
-        float distance = (secondsOfTravel * SPEED_OF_SOUND) / 2;
+        volatile float secondsOfTravel = fabs( (float) counter / (float) F_CPU);
+        float distance = (secondsOfTravel * SPEED_OF_SOUND) / 2.0f;
         measuredAltitude = distance;
         dataReady = true;
     }
