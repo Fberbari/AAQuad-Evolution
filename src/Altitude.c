@@ -89,5 +89,5 @@ ISR(PCINT0_vect)
         dataReady = true;
     }
 
-    isFallingEdge ^= 1;
+    isFallingEdge = !isFallingEdge;
 }
