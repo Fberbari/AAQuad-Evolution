@@ -1,13 +1,21 @@
 #include "PilotInstructions.h"
 
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <math.h>
+
 /***********************************************************************************************************************
  * Definitions
  **********************************************************************************************************************/
 
 #define MAX_16_BIT_VALUE 65535U
 
+#define TIMER_1_PRESCALER	8U
 
-typedef struct 
+#define MAX_PWM_DUTYCYCLE_S 0.002f
+#define MIN_PWM_DUTYCYCLE_S	0.001f
+
+typedef struct
 {
 	float throttle;	// real-time dutyCycle of the 4 channels in seconds
 	float x;
@@ -32,13 +40,13 @@ typedef struct
 NewDataAvailable_t NewDataAvailable;
 
 static uint16_t newestThrottleTimestamp;
-static uint16_t previousThrottleTimestamp; 
+static uint16_t previousThrottleTimestamp;
 static uint16_t newestXTimestamp;
-static uint16_t previousXTimestamp; 
+static uint16_t previousXTimestamp;
 static uint16_t newestYTimestamp;
-static uint16_t previousYTimestamp; 
+static uint16_t previousYTimestamp;
 static uint16_t newestZTimestamp;
-static uint16_t previousZTimestamp; 
+static uint16_t previousZTimestamp;
 
 static float xZeroOffset;
 static float yZeroOffset;	// TODO I'd like to see this be a struct
@@ -47,6 +55,8 @@ static float zZeroOffset;
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
+
+static void InitInterrupts(void);
 
 static void GetDutyCycles(DutyCycle_t *DutyCycle);
 
@@ -79,13 +89,8 @@ void PilotInstructions_Init(void)
 	xZeroOffset = 0.0f;
 	yZeroOffset = 0.0f;
 	zZeroOffset = 0.0f;
-}
 
-void PilotInstructions_LoadCalibration(PilotResult_t *CalibratedZeros)
-{
-	xZeroOffset = CalibratedZeros->xPercentage;
-	yZeroOffset = CalibratedZeros->yPercentage;
-	zZeroOffset = CalibratedZeros->zPercentage;
+	InitInterrupts();
 }
 
 int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)
@@ -97,7 +102,7 @@ int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)
 
 	DutyCycle_t DutyCycle;
 	GetDutyCycles(&DutyCycle);
-	
+
 	if ( ! CapturedWaveformsAreValid(&DutyCycle) )
 	{
 		return AAQUAD_BUSY;
@@ -113,42 +118,27 @@ int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)
 	return AAQUAD_SUCCEEDED;
 }
 
-void PilotInstructions_SetThrottleTimestamp(uint16_t throttleTimestamp)
+static void InitInterrupts(void)
 {
-	previousThrottleTimestamp = newestThrottleTimestamp;
-	newestThrottleTimestamp = throttleTimestamp;
+	// aileron
+	EIMSK |= (1 << INT0); // enable the int0 interrupt
+	EICRA |= (1 << ISC00);	// will fire at any logical change
 
-	NewDataAvailable.throttle = true;
+	// throttle
+	EIMSK |= (1 << INT1); // enable the int1 interrupt
+	EICRA |= (1 << ISC10);	// will fire at any logical change
+
+	// rudder
+	PCICR |= (1 << PCIE1);	// enable pcint 1
+	PCMSK1 |= (1 << PCINT11);
+
+	//elevator
+	PCICR |= (1 << PCIE2);	// enable pcint 2
+	PCMSK2 |= (1 << PCINT17);
+
+	// set the 16 bit timer to normal mode
+	TCCR1B = (1 << CS11);	// 8x preScaler
 }
-
-void PilotInstructions_SetXTimestamp(uint16_t xTimestamp)
-{
-	previousXTimestamp = newestXTimestamp;
-	newestXTimestamp = xTimestamp;
-
-	NewDataAvailable.x = true;
-}
-
-void PilotInstructions_SetYTimestamp(uint16_t yTimestamp)
-{
-	previousYTimestamp = newestYTimestamp;
-	newestYTimestamp = yTimestamp;
-
-	NewDataAvailable.y = true;
-}
-
-void PilotInstructions_SetZTimestamp(uint16_t zTimestamp)
-{
-	previousZTimestamp = newestZTimestamp;
-	newestZTimestamp = zTimestamp;
-
-	NewDataAvailable.z = true;
-}
-
-
-
-
-
 
 static void GetDutyCycles(DutyCycle_t *DutyCycle)
 {
@@ -214,10 +204,6 @@ static bool CapturedWaveformsAreValid(DutyCycle_t *DutyCycle)
 	return true;
 }
 
-
-
-
-
 static float ComputeThrottlePercentage(float throttleDutyCycle)
 {
 	return map(throttleDutyCycle, MIN_PWM_DUTYCYCLE_S, MAX_PWM_DUTYCYCLE_S, 0, 100);
@@ -237,9 +223,6 @@ static float ComputeZPercentage(float zDutyCycle)
 {
 	return map(zDutyCycle, MIN_PWM_DUTYCYCLE_S, MAX_PWM_DUTYCYCLE_S, -100, 100);
 }
-
-
-
 
 static bool ThrottleTimerWrappedAround(void)
 {
@@ -281,34 +264,14 @@ static bool ZTimerWrappedAround(void)
 	return false;
 }
 
-
-
-
-
-
 static bool AllDataIsNew(void)
 {
-	if( ! NewDataAvailable.throttle)
+	if (NewDataAvailable.throttle && NewDataAvailable.x && NewDataAvailable.y && NewDataAvailable.z)
 	{
-		return false;
+		return true;
 	}
 
-	if( ! NewDataAvailable.x)
-	{
-		return false;
-	}
-
-	if( ! NewDataAvailable.y)
-	{
-		return false;
-	}
-
-	if( ! NewDataAvailable.z)
-	{
-		return false;
-	}
-
-	return true;
+	return false;
 }
 
 static void SetAllDataOld(void)
@@ -317,4 +280,33 @@ static void SetAllDataOld(void)
 	NewDataAvailable.x = false;
 	NewDataAvailable.y = false;
 	NewDataAvailable.z = false;
+}
+
+ISR(INT0_vect)		// aileron
+{
+	previousYTimestamp = newestYTimestamp;
+	newestYTimestamp = TCNT1;
+	NewDataAvailable.y = true;
+}
+
+ISR(INT1_vect)		// throttle
+{
+
+	previousThrottleTimestamp = newestThrottleTimestamp;
+	newestThrottleTimestamp = TCNT1;
+	NewDataAvailable.throttle = true;
+}
+
+ISR(PCINT1_vect)	// rudder
+{
+	previousZTimestamp = newestZTimestamp;
+	newestZTimestamp = TCNT1;
+	NewDataAvailable.z = true;
+}
+
+ISR(PCINT2_vect)	// elevator
+{
+	previousXTimestamp = newestXTimestamp;
+	newestXTimestamp = TCNT1;
+	NewDataAvailable.x = true;
 }
