@@ -39,9 +39,12 @@ void Imu_BeginRead(void);
 * This is a non blocking function that returns right away with the results if they are available or an
 * indication that they are still being collected if they aren't.
 * Returns succeeded if the data was successfully collected, busy if new data is not yet available, failed otherwise.
+* The contents of the [out] parameter are only modified in the case of a successful return.
+* All accelerometer and magnetometer data is given in arbitrary units (in anticipation that the vectors will be normalized anyway)
+* while gyroscope data is given in rad/s.
 * @param[out]		imuData 		pointer to the results struct
 * @return			AAQUAD_SUCCEEDED, AAQUAD_BUSY or AAQUAD_FAILED
 */
-int Imu_GetResult(ImuData_t *imuData);
+int Imu_GetResult(ImuData_t *ImuData);
 
 #endif // _IMU_H

@@ -52,6 +52,8 @@
 
 #define MAG_REG_WRITTEN_BIT 2
 
+#define GYRO_RANGE_1000_FACTOR 1879.3f	// LSB/rad/s
+
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
@@ -89,22 +91,34 @@ void Imu_BeginRead(void)
 	SPI_Write(READ_BIT | DATA_REG);
 }
 
-int Imu_GetResult(ImuData_t *imuData)
+int Imu_GetResult(ImuData_t *ImuData)
 {
 	if (! dataReady)
 	{
 		return AAQUAD_BUSY;
 	}
 
-	imuData->magX = *((uint16_t *) ((void *) (&(rawImuData[0]))));
-	imuData->magY = *((uint16_t *) ((void *) (&(rawImuData[2]))));
-	imuData->magZ = *((uint16_t *) ((void *) (&(rawImuData[4]))));
-	imuData->gyrX = *((uint16_t *) ((void *) (&(rawImuData[8]))));
-	imuData->gyrY = *((uint16_t *) ((void *) (&(rawImuData[10]))));
-	imuData->gyrZ = *((uint16_t *) ((void *) (&(rawImuData[12]))));
-	imuData->accX = *((uint16_t *) ((void *) (&(rawImuData[14]))));
-	imuData->accY = *((uint16_t *) ((void *) (&(rawImuData[16]))));
-	imuData->accZ = *((uint16_t *) ((void *) (&(rawImuData[18]))));
+	int16_t *intImuDataPtr = (int16_t *) rawImuData;
+
+	int16_t magX = *(&(intImuDataPtr[0]));
+	int16_t magY = *(&(intImuDataPtr[1]));
+	int16_t magZ = *(&(intImuDataPtr[2]));
+	int16_t gyrX = *(&(intImuDataPtr[4]));
+	int16_t gyrY = *(&(intImuDataPtr[5]));
+	int16_t gyrZ = *(&(intImuDataPtr[6]));
+	int16_t accX = *(&(intImuDataPtr[7]));
+	int16_t accY = *(&(intImuDataPtr[8]));
+	int16_t accZ = *(&(intImuDataPtr[9]));
+
+	ImuData->magX = (float) magX;
+	ImuData->magY = (float) magY;
+	ImuData->magZ = (float) magZ;
+	ImuData->accX = (float) accX;
+	ImuData->accY = (float) accY;
+	ImuData->accZ = (float) accZ;
+	ImuData->gyrX = (float) gyrX / GYRO_RANGE_1000_FACTOR;
+	ImuData->gyrY = (float) gyrY / GYRO_RANGE_1000_FACTOR;
+	ImuData->gyrZ = (float) gyrZ / GYRO_RANGE_1000_FACTOR;
 
 	dataReady = false;
 
