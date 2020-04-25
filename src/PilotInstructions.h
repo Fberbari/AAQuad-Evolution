@@ -27,6 +27,7 @@ void PilotInstructions_LoadCalibration(PilotResult_t *CalibratedZeros);
 * the last time the user called this function and the data was valid.
 * Will return AAQUAD_BUSY if all 4 channels are not updated yet.
 * Will return AAQUAD_FAILED in case of any internal failure.
+* The contents of the [out] parameter are only modified in the case of a successful return.
 * @param[out]	PilotResult 		A pointer the PilotInstructions struct.
 * @return 		AAQUAD_SUCCEEDED, AAQUAD_BUSY, AAQUAD_FAILED
 */
