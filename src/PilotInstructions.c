@@ -39,14 +39,14 @@ typedef struct
 
 NewDataAvailable_t NewDataAvailable;
 
-static uint16_t newestThrottleTimestamp;
-static uint16_t previousThrottleTimestamp;
-static uint16_t newestXTimestamp;
-static uint16_t previousXTimestamp;
-static uint16_t newestYTimestamp;
-static uint16_t previousYTimestamp;
-static uint16_t newestZTimestamp;
-static uint16_t previousZTimestamp;
+static volatile uint16_t newestThrottleTimestamp;
+static volatile uint16_t previousThrottleTimestamp;
+static volatile uint16_t newestXTimestamp;
+static volatile uint16_t previousXTimestamp;
+static volatile uint16_t newestYTimestamp;
+static volatile uint16_t previousYTimestamp;
+static volatile uint16_t newestZTimestamp;
+static volatile uint16_t previousZTimestamp;
 
 static float xZeroOffset;
 static float yZeroOffset;	// TODO I'd like to see this be a struct

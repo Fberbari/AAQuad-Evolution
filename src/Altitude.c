@@ -35,7 +35,7 @@ void Altitude_Init(void)
     // timer 3 used to measure the length of the echo pulse
     TCCR3B = (1 << CS30);
 
-    DDRB |= (1 << TRIG_PIN);
+    DDRB |= (1 << TRIG_PIN);	// TODO I burned the output driver of the trig pin so the temporary solution is to swap the trig and echo pin. This is currently done in this file. Just do it on the pcb. Permanent fix is just to replace the microcontroller.
     PORTB &= ~(1 << TRIG_PIN);
 
     // pcint for the echo pin
@@ -72,12 +72,12 @@ ISR(TIMER0_COMPA_vect)
 
 ISR(PCINT0_vect)
 {
-    static uint16_t previousTimestamp;
-    static bool isFallingEdge;
+    static volatile uint16_t previousTimestamp;
+    static volatile bool isFallingEdge;
 
-    uint16_t thisTimestamp = TCNT3;
+    volatile uint16_t thisTimestamp = TCNT3;
 
-    int32_t counter = thisTimestamp - previousTimestamp;
+    volatile int32_t counter = thisTimestamp - previousTimestamp;
 
     previousTimestamp = thisTimestamp;
 
