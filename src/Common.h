@@ -20,10 +20,8 @@
 
 #define CTRL_LOOP_PERIOD	0.021f	// in seconds
 
-#define TIMER_1_PRESCALER	8U
-
 #define MAX_VALUE_NO_PROP_SPIN	12.0f
-#define MOTOR_VALUE_NO_SPIN		2.0f 	// 0 should not be used as a small electrical glitc may produce an undefined (negative) signal and confuse the esc's
+#define MOTOR_VALUE_NO_SPIN		2.0f 	// 0 should not be used as a small electrical glitch may produce an undefined (negative) signal and confuse the esc's
 
 typedef struct
 {
@@ -34,16 +32,29 @@ typedef struct
 
 }PilotResult_t;
 
-typedef struct 
+typedef struct ImuData
 {
-	float xAccAngle;				// pitch angle in degrees (positive is when motor 0 lowers, 0 is level)
-	float yAccAngle;				// bank angle in degrees (positive is when motor 3 lowers, 0 is level)
+	int16_t gyrX, gyrY, gyrZ;	// data given in rad/s
+	int16_t accX, accY, accZ;	// both mag and acc are arbitrary units
+	int16_t magX, magY, magZ;	// On the current pcb, when looking straight down onto it, x is in the forward direction, y is to the left, and z is up towards your face.
 
-	float xGyroRate;				// rotation speed in degrees per second (positive is motor 2 dipping down and motor 0 going up)
-	float yGyroRate;				// rotation speed in degrees per second (positive is motor 3 dipping down and motor 1 going up)
-	float zGyroRate;				// rotation speed in degrees per second (positive is clockwise when looking down at the quad)
-	
-}SensorResults_t;
+}ImuData_t;
+
+typedef struct EulerXYZ
+{
+    float phi;
+    float theta;
+    float psi;
+
+}EulerXYZ_t;
+
+typedef struct EulerRates
+{
+    float phiDot;
+    float thetaDot;
+    float psiDot;
+
+}EulerRates_t;
 
 /***********************************************************************************************************************
  * Prototypes
@@ -52,5 +63,24 @@ typedef struct
 float map(float num, float minInput, float maxInput, float minOutput, float maxOutput);
 
 float Square(int16_t num);
+
+float Squaref(float num);
+
+/**
+* This function converts a quaternion to the equivalent XYZ euler angles.
+* All angles are given in radians.
+* param[in]			q0,q1,q2,q3			the quaternion we wish to convert to euler angles
+* @param[out]		EulerAngles 		pointer to the result, in meters
+*/
+void quat2Euler(float q0, float q1, float q2, float q3, EulerXYZ_t *EulerAngles);
+
+/**
+* Given the current orientation of an object, and it's angular velocities, this function gives the derivatives of the XYZ euler angles.
+* param[in]			angVelX, angVelY, angVelZ		The angular velocities of the quad, in rad/s as reported by an onboard gyroscope.
+* param[in]			EulerAngles						The orientation of the quad, in radians.
+* @param[out]		EulerRates 						The derivatives of the euler angles, in rad/s
+* @return			AAQUAD_SUCCEEDED, AAQUAD_BUSY or AAQUAD_FAILED
+*/
+void gyro2EulerRates(EulerXYZ_t *EulerAngles, float angVelX, float angVelY, float angVelZ, EulerRates_t *EulerRates);
 
 #endif // _COMMON_H

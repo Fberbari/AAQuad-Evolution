@@ -72,45 +72,45 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <AvrGcc>
-  <avrgcc.common.Device>-mmcu=atmega328pb -B "%24(PackRepoDir)\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega328pb"</avrgcc.common.Device>
-  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
-  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
-  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
-  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
-  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
-  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
-  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
-  <avrgcc.compiler.symbols.DefSymbols>
-    <ListValues>
-      <Value>NDEBUG</Value>
-    </ListValues>
-  </avrgcc.compiler.symbols.DefSymbols>
-  <avrgcc.compiler.directories.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.3.300\include</Value>
-      <Value>../../src</Value>
-    </ListValues>
-  </avrgcc.compiler.directories.IncludePaths>
-  <avrgcc.compiler.optimization.level>Optimize most (-O3)</avrgcc.compiler.optimization.level>
-  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
-  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
-  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
-  <avrgcc.compiler.warnings.ExtraWarnings>True</avrgcc.compiler.warnings.ExtraWarnings>
-  <avrgcc.compiler.warnings.Undefined>True</avrgcc.compiler.warnings.Undefined>
-  <avrgcc.compiler.warnings.Pedantic>True</avrgcc.compiler.warnings.Pedantic>
-  <avrgcc.compiler.warnings.PedanticWarningsAsErrors>True</avrgcc.compiler.warnings.PedanticWarningsAsErrors>
-  <avrgcc.compiler.miscellaneous.OtherFlags>-std=gnu99 -Wdouble-promotion</avrgcc.compiler.miscellaneous.OtherFlags>
-  <avrgcc.linker.libraries.Libraries>
-    <ListValues>
-      <Value>libm</Value>
-    </ListValues>
-  </avrgcc.linker.libraries.Libraries>
-  <avrgcc.assembler.general.IncludePaths>
-    <ListValues>
-      <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.3.300\include</Value>
-    </ListValues>
-  </avrgcc.assembler.general.IncludePaths>
-</AvrGcc>
+        <avrgcc.common.Device>-mmcu=atmega328pb -B "%24(PackRepoDir)\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega328pb"</avrgcc.common.Device>
+        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+        <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+        <avrgcc.compiler.symbols.DefSymbols>
+          <ListValues>
+            <Value>NDEBUG</Value>
+          </ListValues>
+        </avrgcc.compiler.symbols.DefSymbols>
+        <avrgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.3.300\include</Value>
+            <Value>../../src</Value>
+          </ListValues>
+        </avrgcc.compiler.directories.IncludePaths>
+        <avrgcc.compiler.optimization.level>Optimize most (-O3)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.compiler.warnings.ExtraWarnings>True</avrgcc.compiler.warnings.ExtraWarnings>
+        <avrgcc.compiler.warnings.Undefined>True</avrgcc.compiler.warnings.Undefined>
+        <avrgcc.compiler.warnings.Pedantic>True</avrgcc.compiler.warnings.Pedantic>
+        <avrgcc.compiler.warnings.PedanticWarningsAsErrors>True</avrgcc.compiler.warnings.PedanticWarningsAsErrors>
+        <avrgcc.compiler.miscellaneous.OtherFlags>-std=gnu99 -Wdouble-promotion</avrgcc.compiler.miscellaneous.OtherFlags>
+        <avrgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>libm</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.Libraries>
+        <avrgcc.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>%24(PackRepoDir)\atmel\ATmega_DFP\1.3.300\include</Value>
+          </ListValues>
+        </avrgcc.assembler.general.IncludePaths>
+      </AvrGcc>
     </ToolchainSettings>
     <UsesExternalMakeFile>False</UsesExternalMakeFile>
     <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
@@ -139,6 +139,7 @@
       <Value>../../src</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
+  <avrgcc.compiler.optimization.level>Optimize debugging experience (-Og)</avrgcc.compiler.optimization.level>
   <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
   <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
@@ -243,13 +244,13 @@
       <SubType>compile</SubType>
       <Link>main.c</Link>
     </Compile>
-    <Compile Include="..\src\Calibration.c">
+    <Compile Include="..\src\Altitude.c">
       <SubType>compile</SubType>
-      <Link>src\Calibration.c</Link>
+      <Link>src\Altitude.c</Link>
     </Compile>
-    <Compile Include="..\src\Calibration.h">
+    <Compile Include="..\src\Altitude.h">
       <SubType>compile</SubType>
-      <Link>src\Calibration.h</Link>
+      <Link>src\Altitude.h</Link>
     </Compile>
     <Compile Include="..\src\Common.c">
       <SubType>compile</SubType>
@@ -267,17 +268,21 @@
       <SubType>compile</SubType>
       <Link>src\Controller.h</Link>
     </Compile>
-    <Compile Include="..\src\I2CDriver.c">
+    <Compile Include="..\src\I2C.c">
       <SubType>compile</SubType>
-      <Link>src\I2CDriver.c</Link>
+      <Link>src\I2C.c</Link>
     </Compile>
-    <Compile Include="..\src\I2CDriver.h">
+    <Compile Include="..\src\I2C.h">
       <SubType>compile</SubType>
-      <Link>src\I2CDriver.h</Link>
+      <Link>src\I2C.h</Link>
     </Compile>
-    <Compile Include="..\src\Interrupts.c">
+    <Compile Include="..\src\Imu.c">
       <SubType>compile</SubType>
-      <Link>src\Interrupts.c</Link>
+      <Link>src\Imu.c</Link>
+    </Compile>
+    <Compile Include="..\src\Imu.h">
+      <SubType>compile</SubType>
+      <Link>src\Imu.h</Link>
     </Compile>
     <Compile Include="..\src\Leds.c">
       <SubType>compile</SubType>
@@ -287,13 +292,13 @@
       <SubType>compile</SubType>
       <Link>src\Leds.h</Link>
     </Compile>
-    <Compile Include="..\src\Pid.c">
+    <Compile Include="..\src\MahonyAHRS.c">
       <SubType>compile</SubType>
-      <Link>src\Pid.c</Link>
+      <Link>src\MahonyAHRS.c</Link>
     </Compile>
-    <Compile Include="..\src\Pid.h">
+    <Compile Include="..\src\MahonyAHRS.h">
       <SubType>compile</SubType>
-      <Link>src\Pid.h</Link>
+      <Link>src\MahonyAHRS.h</Link>
     </Compile>
     <Compile Include="..\src\PilotInstructions.c">
       <SubType>compile</SubType>
@@ -311,14 +316,6 @@
       <SubType>compile</SubType>
       <Link>src\PwmChip.h</Link>
     </Compile>
-    <Compile Include="..\src\SensorData.c">
-      <SubType>compile</SubType>
-      <Link>src\SensorData.c</Link>
-    </Compile>
-    <Compile Include="..\src\SensorData.h">
-      <SubType>compile</SubType>
-      <Link>src\SensorData.h</Link>
-    </Compile>
     <Compile Include="..\src\SPI.c">
       <SubType>compile</SubType>
       <Link>src\SPI.c</Link>
@@ -326,12 +323,6 @@
     <Compile Include="..\src\SPI.h">
       <SubType>compile</SubType>
       <Link>src\SPI.h</Link>
-    </Compile>
-    <Compile Include="src\Imu.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="src\Imu.h">
-      <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

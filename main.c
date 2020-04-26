@@ -4,12 +4,9 @@
  * Firmware Developer : Anthony Berbari
  */
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <stdlib.h>
-
 #include "Controller.h"
-#include "Calibration.h"
+
+#include "Common.h"
 
 /***********************************************************************************************************************
  * Code
@@ -17,9 +14,7 @@
 
 int main(void)
 {
-	sei();
 	Controller_Init();
-	Calibration_Calibrate();
 
     while (1)
     {
