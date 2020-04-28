@@ -3,6 +3,7 @@
 #include "Imu.h"
 #include "Altitude.h"
 #include "MahonyAHRS.h"
+#include "Pid.h"
 #include "PwmChip.h"
 
 #include "Common.h"
@@ -21,14 +22,14 @@ typedef enum state
     CTRL_TRIGGER_NEW_MEASUREMENTS,
     CTRL_FUSE_MEASUREMENTS,
     CTRL_CONVERT_TO_EULER,
-	CTRL_PROCESS_RESULTS,
+	CTRL_COMPUTE_PID,
 	CTRL_SEND_TO_PWM,
 	CTRL_WAIT_FOR_TIMER,
 	CTRL_FAILED
 
 }Controller_State_t;
 
-#define TIMER_VAL_20_MS (F_CPU / 400)   // assuming clk divider of 8.
+#define TIMER_VAL_20_MS (F_CPU / 400)   // assuming clk divider of 8.   // TODO run this off of common's CTRL_LOOP_PERIOD
 
 /***********************************************************************************************************************
  * Variables
@@ -55,6 +56,7 @@ static Controller_State_t GetAltitude_State(void);
 static Controller_State_t TriggerNewMeasurements_State(void);
 static Controller_State_t FuseMeasurements_State(void);
 static Controller_State_t ConvertToEuler_State(void);
+static Controller_State_t ComputePidState(void);
 static Controller_State_t SendToPwm_State(void);
 static Controller_State_t WaitForTimer_State(void);
 
@@ -71,6 +73,7 @@ void Controller_Init(void)
 	PilotInstructions_Init();
     Imu_Init();
     Altitude_Init();
+    Pid_Init();
 	PwmChip_Init();
 
     InitData();
@@ -111,6 +114,10 @@ void Controller_Do(void)
 		case CTRL_SEND_TO_PWM:
 			nextState = SendToPwm_State();
 			break;
+
+        case CTRL_COMPUTE_PID:
+            nextState = ComputePidState();
+            break;
 
         case CTRL_WAIT_FOR_TIMER:
             nextState = WaitForTimer_State();
@@ -213,6 +220,19 @@ static Controller_State_t ConvertToEuler_State(void)
     quat2Euler(q0, q1, q2, q3, &EulerAngles);
 
     gyro2EulerRates(&EulerAngles, ImuData.gyrX, ImuData.gyrY, ImuData.gyrZ, &EulerRates);
+
+    return CTRL_COMPUTE_PID;
+}
+
+static Controller_State_t ComputePidState(void)
+{
+
+    int r = Pid_Compute(&PilotResult, &EulerAngles, &EulerRates, altitude, motors);
+
+    if(r == AAQUAD_FAILED)
+    {
+        return CTRL_FAILED;
+    }
 
     return CTRL_SEND_TO_PWM;
 }

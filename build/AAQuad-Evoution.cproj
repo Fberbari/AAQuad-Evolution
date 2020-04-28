@@ -139,7 +139,7 @@
       <Value>../../src</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
-  <avrgcc.compiler.optimization.level>Optimize debugging experience (-Og)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
   <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
   <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
@@ -299,6 +299,14 @@
     <Compile Include="..\src\MahonyAHRS.h">
       <SubType>compile</SubType>
       <Link>src\MahonyAHRS.h</Link>
+    </Compile>
+    <Compile Include="..\src\Pid.c">
+      <SubType>compile</SubType>
+      <Link>src\Pid.c</Link>
+    </Compile>
+    <Compile Include="..\src\Pid.h">
+      <SubType>compile</SubType>
+      <Link>src\Pid.h</Link>
     </Compile>
     <Compile Include="..\src\PilotInstructions.c">
       <SubType>compile</SubType>

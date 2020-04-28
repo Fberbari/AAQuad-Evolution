@@ -1,30 +1,45 @@
 #include "Pid.h"
-#include <math.h>
+
+/***********************************************************************************************************************
+ * Definitions
+ **********************************************************************************************************************/
+
+#define kpX 30.0f
+#define kdX 10.0f
+#define kiX 0.2f
+
+#define kpY 30.0f
+#define kdY 10.0f
+#define kiY 0.2f
+
+#define kpZ 20.0f
+#define kdZ 30.0f
+#define kiZ 0.2f
+
+#define kpA 3.0f
+#define kdA 0.2f
+#define kiA 2.0f
+
+#define TS CTRL_LOOP_PERIOD
+
+#define MOTOR_PERCENT_LEVEL_ALTITUDE_HOLD 60.0f
 
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
 
-static float bestGuessXAngle;
-static float bestGuessYAngle;
-static float bestGuessZRate;
+static float xAccumulatedIntegral;
+static float yAccumulatedIntegral;
+static float zAccumulatedIntegral;
 
-static float xErrorArray[5];
-static float yErrorArray[5];
-static float zErrorArray[5];
-
-static float previousXAdjustement;
-static float previousYAdjustement;
-static float previousZAdjustement;
+static float altitudeAccumulatedIntegral;
 
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
-static void UpdateXErrorArray(float currentXError);
-static void UpdateYErrorArray(float currentYError);
-static void UpdateZErrorArray(float currentZError);
-
+static float ComputeHeadingPid(float desired, float actual, float actualRate, float kp, float ki, float kd, float *accumulatedIntegral);
+static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles);
 static void ConstrainMotorRanges(float *motors);
 
 /***********************************************************************************************************************
@@ -34,159 +49,96 @@ static void ConstrainMotorRanges(float *motors);
 
 void Pid_Init(void)
 {
-	bestGuessXAngle = 0;
-	bestGuessYAngle = 0;
-
-	for (int i = 0; i < 5; i++)
-	{
-		xErrorArray[i] = 0;
-		yErrorArray[i] = 0;
-	}
-
-	previousXAdjustement = 0;
-	previousYAdjustement = 0;
 
 }
 
-int Pid_Compute(PilotResult_t *PilotResult, SensorResults_t *SensorResults, float *motors)
+int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_t *EulerRates, float altitude, float *motors)
 {
-
 	if (PilotResult->throttlePercentage < MAX_VALUE_NO_PROP_SPIN)
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			motors[i] = MOTOR_VALUE_NO_SPIN;   
+			motors[i] = MOTOR_VALUE_NO_SPIN;
 		}
 
 		return AAQUAD_SUCCEEDED;
 	}
 
-	for (int i = 0; i < 4; i++)
-	{
-		motors[i] = PilotResult->throttlePercentage;   
-	}
+    float targetXAngle = MAX_X_THROW * (PilotResult->xPercentage / 100.0f);
+    float targetYAngle = MAX_Y_THROW * (PilotResult->yPercentage / 100.0f);
+    float targetZAngle = MAX_Z_THROW * (PilotResult->zPercentage / 100.0f);
+    float targetAltitude = MAX_ALTITUDE * (PilotResult->throttlePercentage / 100.0f);
 
-	float xAngleFromGyro = bestGuessXAngle + (CTRL_LOOP_PERIOD * SensorResults->xGyroRate);
-	float yAngleFromGyro = bestGuessYAngle + (CTRL_LOOP_PERIOD * SensorResults->yGyroRate);
-	float xAngleFromAcc = SensorResults->xAccAngle;
-	float yAngleFromAcc = SensorResults->yAccAngle;
-	bestGuessXAngle = (0.98f * xAngleFromGyro + 0.02f * xAngleFromAcc);
-	bestGuessYAngle = (0.98f * yAngleFromGyro + 0.02f * yAngleFromAcc);
-	bestGuessZRate = SensorResults->zGyroRate;
+    float rollPercent = ComputeHeadingPid(targetXAngle, EulerAngles->phi, EulerRates->phiDot, kpX, kiX, kdX, &xAccumulatedIntegral);
+    float pitchPercent = ComputeHeadingPid(targetYAngle, EulerAngles->theta, EulerRates->thetaDot, kpY, kiY, kdY, &yAccumulatedIntegral);
+    float yawPercent = ComputeHeadingPid(targetZAngle, EulerAngles->psi, EulerRates->psiDot, kpZ, kiZ, kdZ, &zAccumulatedIntegral);
 
-	float targetXAngle = (MAX_X_THROW / 100.0f) * PilotResult->xPercentage;
-	float targetYAngle = (MAX_Y_THROW / 100.0f) * PilotResult->yPercentage;
-	float targetZRate = (MAX_Z_THROW / 100.0f) * PilotResult->zPercentage;
-
-	UpdateXErrorArray(bestGuessXAngle - targetXAngle);
-	UpdateYErrorArray(bestGuessYAngle - targetYAngle);
-	UpdateZErrorArray(bestGuessZRate - targetZRate);
-
-	float xykp = 0.125f;
-	float xykd = 0.025f;
-
-	float zkp = 0.15;
-	float zkd = 0.015;
-
-	float xAdjustement = previousXAdjustement + (((xykp + (xykd / CTRL_LOOP_PERIOD)) * xErrorArray[0]) - ((xykp + (2 * xykd / CTRL_LOOP_PERIOD)) * xErrorArray[1]) + ((xykd / CTRL_LOOP_PERIOD) * xErrorArray[2]));
-	previousXAdjustement = xAdjustement;
-	
-	float yAdjustement = previousYAdjustement + (((xykp + (xykd / CTRL_LOOP_PERIOD)) * yErrorArray[0]) - ((xykp + (2 * xykd / CTRL_LOOP_PERIOD)) * yErrorArray[1]) + ((xykd / CTRL_LOOP_PERIOD) * yErrorArray[2]));
-	previousYAdjustement = yAdjustement;
-
-	float zAdjustement = previousZAdjustement + (((zkp + (zkd / CTRL_LOOP_PERIOD)) * zErrorArray[0]) - ((zkp + (2 * zkd / CTRL_LOOP_PERIOD)) * zErrorArray[1]) + ((zkd / CTRL_LOOP_PERIOD) * zErrorArray[2]));
-	previousZAdjustement = zAdjustement;
+    float altitudePercent = ComputeAltitudePid(targetAltitude, altitude, EulerAngles);
 
 
+    motors[0] = altitudePercent;
+    motors[1] = altitudePercent;
+    motors[2] = altitudePercent;
+    motors[3] = altitudePercent;
 
-	motors[0] += xAdjustement;
-	motors[2] -= xAdjustement;
+	motors[0] += rollPercent;
+	motors[1] += rollPercent;
+    motors[2] -= rollPercent;
+    motors[3] -= rollPercent;
 
-	motors[1] += yAdjustement;
-	motors[3] -= yAdjustement;
-	
-	motors[0] -= zAdjustement;
-	motors[1] += zAdjustement;
-	motors[2] -= zAdjustement;
-	motors[3] += zAdjustement;
+	motors[0] += pitchPercent;
+    motors[1] -= pitchPercent;
+	motors[2] += pitchPercent;
+	motors[3] -= pitchPercent;
+
+	motors[0] += yawPercent;
+    motors[1] -= yawPercent;
+    motors[2] -= yawPercent;
+	motors[3] += yawPercent;
 
 	ConstrainMotorRanges(motors);
-	
+
 	return AAQUAD_SUCCEEDED;
 }
 
-void Pid_SetIntialAngles(float InitialXAngle, float InitialYangle)
+static float ComputeHeadingPid(float desired, float actual, float actualRate, float kp, float ki, float kd, float *accumulatedIntegral)
 {
-	bestGuessXAngle = InitialXAngle;
-	bestGuessYAngle = InitialYangle;
+    float error = desired - actual;
+
+    *accumulatedIntegral += (TS * error); // TODO anti windup ?
+
+    return ((kp * error) + (ki * (*accumulatedIntegral)) - (kd * actualRate));
 }
 
-
-static void UpdateXErrorArray(float currentXError)
+static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles)
 {
-	for (int i = 4; i > 0; i-- )
-	{
-		xErrorArray[i] = xErrorArray[i-1];
-	}
+    static float historicalValue[3];
 
-	xErrorArray[0] = currentXError;
-}
+    float error = desired - actual;
+    float altitudeHoldValue = MOTOR_PERCENT_LEVEL_ALTITUDE_HOLD / ((float) cosf(EulerAngles->phi) * (float) cosf(EulerAngles->theta));
 
-static void UpdateYErrorArray(float currentYError)
-{
-	for (int i = 4; i > 0; i-- )
-	{
-		yErrorArray[i] = yErrorArray[i-1];
-	}
+    historicalValue[2] = historicalValue[1];
+    historicalValue[1] = historicalValue[0];
+    historicalValue[0] = actual;
 
-	yErrorArray[0] = currentYError;
-}
+    float derivative = ((3 * historicalValue[0]) - (4 * historicalValue[1]) + (historicalValue[2])) / TS;
 
-static void UpdateZErrorArray(float currentZError)
-{
-	for (int i = 4; i > 0; i-- )
-	{
-		zErrorArray[i] = zErrorArray[i-1];
-	}
+    altitudeAccumulatedIntegral += (TS * error); // TODO anti windup ?
 
-	zErrorArray[0] = currentZError;
+    return (altitudeHoldValue + (kpA * error) + (kiA * altitudeAccumulatedIntegral) - (kdA * derivative));
 }
 
 static void ConstrainMotorRanges(float *motors)
 {
-	if (motors[0] > 100)
-	{
-		motors[0] = 100;
-	}
-	else if (motors[0] < 0)
-	{
-		motors[0] = 0;
-	}
-	
-	if (motors[1] > 100)
-	{
-		motors[1] = 100;
-	}
-	else if (motors[1] < 0)
-	{
-		motors[1] = 0;
-	}
-	
-	if (motors[2] > 100)
-	{
-		motors[2] = 100;
-	}
-	else if (motors[2] < 0)
-	{
-		motors[2] = 0;
-	}
-	
-	if (motors[3] > 100)
-	{
-		motors[3] = 100;
-	}
-	else if (motors[3] < 0)
-	{
-		motors[3] = 0;
-	}
+    for(int i = 0; i < 4; i++)
+    {
+        if (motors[i] > 99.0f)
+        {
+            motors[i] = 99.0f;
+        }
+        else if (motors[i] < MOTOR_VALUE_NO_SPIN)
+        {
+            motors[i] = MOTOR_VALUE_NO_SPIN;
+        }
+    }
 }
