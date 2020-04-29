@@ -5,7 +5,9 @@
 
 #define SPEED_OF_SOUND 340.0f  // m/s
 
-#define SECONDS_PER_TICK ((float)(1.0f / F_CPU))    // assuming timer has no presaler
+#define MAX_16_BIT_VALUE 65535U
+
+#define SECONDS_PER_TICK ((float)(64.0f / F_CPU))    // assuming timer has presaler of 64
 
 #define TRIG_PIN 1
 
@@ -32,8 +34,8 @@ void Altitude_Init(void)
 	TIMSK0 = (1 << OCIE0A);
     OCR0A = TIMER_VAL_11_US;
 
-    // timer 3 used to measure the length of the echo pulse
-    TCCR3B = (1 << CS30);
+    // timer 3 used to measure the length of the echo pulse (prescaler of 64)
+    TCCR3B = ((1 << CS31) | (1 << CS30));
 
     DDRB |= (1 << TRIG_PIN);	// TODO I burned the output driver of the trig pin so the temporary solution is to swap the trig and echo pin. This is currently done in this file. Just do it on the pcb. Permanent fix is just to replace the microcontroller.
     PORTB &= ~(1 << TRIG_PIN);
@@ -73,21 +75,27 @@ ISR(TIMER0_COMPA_vect)
 ISR(PCINT0_vect)
 {
     static volatile uint16_t previousTimestamp;
-    static volatile bool isFallingEdge;
 
     volatile uint16_t thisTimestamp = TCNT3;
 
-    volatile int32_t counter = thisTimestamp - previousTimestamp;
-
-    previousTimestamp = thisTimestamp;
-
-    if (isFallingEdge == true)
+    if ((PINB & (1 << PINB0)) == 0)	// falling edge
     {
-        volatile float secondsOfTravel = fabs( (float) counter / (float) F_CPU);
+		volatile int32_t counter;
+
+		if (thisTimestamp < previousTimestamp)  // timer wrapped around
+		{
+			counter = thisTimestamp + (MAX_16_BIT_VALUE - previousTimestamp);
+		}
+		else
+		{
+			counter = thisTimestamp - previousTimestamp;
+		}
+
+        volatile float secondsOfTravel = (float) counter * SECONDS_PER_TICK;
         float distance = (secondsOfTravel * SPEED_OF_SOUND) / 2.0f;
         measuredAltitude = distance;
         dataReady = true;
     }
 
-    isFallingEdge = !isFallingEdge;
+	previousTimestamp = thisTimestamp;
 }
