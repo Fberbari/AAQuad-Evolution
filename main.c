@@ -5,6 +5,7 @@
  */
 
 #include "Controller.h"
+#include "Calibration.h"
 
 #include "Common.h"
 
@@ -15,6 +16,7 @@
 int main(void)
 {
 	Controller_Init();
+    Calibration_Calibrate();
 
     while (1)
     {

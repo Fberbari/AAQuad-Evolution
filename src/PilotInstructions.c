@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <math.h>
+#include <string.h>
 
 /***********************************************************************************************************************
  * Definitions
@@ -48,9 +49,7 @@ static volatile uint16_t previousYTimestamp;
 static volatile uint16_t newestZTimestamp;
 static volatile uint16_t previousZTimestamp;
 
-static float xZeroOffset;
-static float yZeroOffset;	// TODO I'd like to see this be a struct
-static float zZeroOffset;
+static PilotResult_t CalibratedZeros;
 
 /***********************************************************************************************************************
  * Prototypes
@@ -86,9 +85,10 @@ void PilotInstructions_Init(void)
 	NewDataAvailable.y = false;
 	NewDataAvailable.z = false;
 
-	xZeroOffset = 0.0f;
-	yZeroOffset = 0.0f;
-	zZeroOffset = 0.0f;
+	CalibratedZeros.throttlePercentage = 0.0f;
+	CalibratedZeros.xPercentage = 0.0f;
+	CalibratedZeros.yPercentage = 0.0f;
+	CalibratedZeros.zPercentage = 0.0f;
 
 	InitInterrupts();
 }
@@ -108,14 +108,31 @@ int PilotInstructions_ComputePilotResult(PilotResult_t *PilotResult)
 		return AAQUAD_BUSY;
 	}
 
-	PilotResult->throttlePercentage = ComputeThrottlePercentage(DutyCycle.throttle);
-	PilotResult->xPercentage = ComputeXPercentage(DutyCycle.x) - xZeroOffset;
-	PilotResult->yPercentage = ComputeYPercentage(DutyCycle.y) - yZeroOffset;
-	PilotResult->zPercentage = ComputeZPercentage(DutyCycle.z) - zZeroOffset;
+	PilotResult->throttlePercentage = ComputeThrottlePercentage(DutyCycle.throttle) - CalibratedZeros.throttlePercentage;
+	PilotResult->xPercentage = ComputeXPercentage(DutyCycle.x) - CalibratedZeros.xPercentage;
+	PilotResult->yPercentage = ComputeYPercentage(DutyCycle.y) - CalibratedZeros.yPercentage;
+
+	// Percentage must be between -100 and 100. Since we are dealing with a yaw angle, and -100% = 100% = pi, -101% corresponds to 99%.
+	// This only arrises as an issue because yaw is initially calibrated so that the 0 position of the control stick corresponds to the
+	// azimuth of the aircraft. So summing that non 0 angle with some throw the pilot asks for may result in a number above 100% or below -100%.
+	PilotResult->zPercentage = ComputeZPercentage(DutyCycle.z) - CalibratedZeros.zPercentage;
+	if (PilotResult->zPercentage > 100.0f)
+	{
+		PilotResult->zPercentage = PilotResult->zPercentage - 200.0f;
+	}
+	else if (PilotResult->zPercentage < (-100.0f))
+	{
+		PilotResult->zPercentage = PilotResult->zPercentage + 200.0f;
+	}
 
 	SetAllDataOld();
 
 	return AAQUAD_SUCCEEDED;
+}
+
+void PilotInstructions_LoadCalibration(PilotResult_t *Calibration)
+{
+	memcpy(&CalibratedZeros, Calibration, sizeof(PilotResult_t));
 }
 
 static void InitInterrupts(void)

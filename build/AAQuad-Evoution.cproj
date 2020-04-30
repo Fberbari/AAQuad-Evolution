@@ -139,7 +139,7 @@
       <Value>../../src</Value>
     </ListValues>
   </avrgcc.compiler.directories.IncludePaths>
-  <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.level>Optimize debugging experience (-Og)</avrgcc.compiler.optimization.level>
   <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
   <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
   <avrgcc.compiler.optimization.DebugLevel>Maximum (-g3)</avrgcc.compiler.optimization.DebugLevel>
@@ -251,6 +251,14 @@
     <Compile Include="..\src\Altitude.h">
       <SubType>compile</SubType>
       <Link>src\Altitude.h</Link>
+    </Compile>
+    <Compile Include="..\src\Calibration.c">
+      <SubType>compile</SubType>
+      <Link>src\Calibration.c</Link>
+    </Compile>
+    <Compile Include="..\src\Calibration.h">
+      <SubType>compile</SubType>
+      <Link>src\Calibration.h</Link>
     </Compile>
     <Compile Include="..\src\Common.c">
       <SubType>compile</SubType>

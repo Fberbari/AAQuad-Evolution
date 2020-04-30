@@ -9,12 +9,11 @@
  **********************************************************************************************************************/
 
 /**
-* If pilot rquests a Calibration (with a specific sequenceon is radio, see README), 
-* all current sensor output and pilot output readings are stored into EEPROM.
-* Before exiting, will load the most recent calibration from EEPROM and deliver it to the modules that require it.
+* Call this function exactly once, after all the other modules are initialised, but before the main control loop begins.
+* If the pilot requests a calibration (with a specific sequence on their radio, see README), 
+* the module collects sensor and pilot measurements and stores them in eeprom.
+* Those measurements are then used to calibrate the appropriate modules everytime the board is powered.
 */
 void Calibration_Calibrate(void);
 
 #endif // _CALIBRATION_H
-
-// TODO, the values obtained by this module should be stored into the on chip eeprom

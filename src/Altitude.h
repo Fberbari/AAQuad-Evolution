@@ -14,6 +14,12 @@
 void Altitude_Init(void);
 
 /**
+* Calibrates the ultrasonic distance sensor.
+* @param[in]	altitudeCalibration 	systematic error associated with collection of the altitude measurement.
+*/
+void Altitude_LoadCalibration(float altitudeCalibration);
+
+/**
 * Begins the process of measuring the altitude.
 * Call this function synchronously.
 * This is a non blocking function that returns right away.

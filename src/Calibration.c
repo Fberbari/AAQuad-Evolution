@@ -1,8 +1,10 @@
 #include "Calibration.h"
-#include "SensorData.h"
+#include "Imu.h"
 #include "PilotInstructions.h"
+#include "Altitude.h"
+#include "MahonyAHRS.h"
 #include "Pid.h"
-#include "Leds.h"
+
 #include "Common.h"
 
 #include <avr/eeprom.h>
@@ -14,14 +16,21 @@
 #define EEPROM_START_ADDRESS	(const uint8_t *) 0x0
 
 /***********************************************************************************************************************
+ * Variables
+ **********************************************************************************************************************/
+
+static float initialAzimuth;
+
+/***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
-bool CalibrationRequested(void);
-void WaitUntilPilotReady(void);
-void GetCalibration(PilotResult_t *PilotCalibration, SensorResults_t *SensorCalibration);
-void SaveCalibration(PilotResult_t *PilotCalibration, SensorResults_t *SensorCalibration);
-void LoadCalibration(void);
+static bool CalibrationRequested(void);
+static void WaitUntilPilotReady(void);
+static void GetCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration);
+static void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration);
+static void GetInitialAzimuth(void);
+static void LoadCalibration(void);
 
 /***********************************************************************************************************************
  * Code
@@ -32,24 +41,20 @@ void Calibration_Calibrate(void)
 
 	if ( CalibrationRequested() )
 	{
-		Leds_SetLed0();
-		
+
 		WaitUntilPilotReady();
 
 		PilotResult_t PilotCalibration = {0};
-		SensorResults_t SensorCalibration = {0};
+		float altitudeCalibration = 0.0f;
 
-		GetCalibration(&PilotCalibration, &SensorCalibration);
-		SaveCalibration(&PilotCalibration, &SensorCalibration);
-		
-		Leds_ClearLed0();
+		GetCalibration(&PilotCalibration, &altitudeCalibration);
+		SaveCalibration(&PilotCalibration, &altitudeCalibration);
+
 	}
 
-	LoadCalibration();
+	GetInitialAzimuth();
 
-	float initialXAngle, initialYAngle;
-	SensorData_GetInitialAngles(&initialXAngle, &initialYAngle);
-	Pid_SetIntialAngles(initialXAngle, initialYAngle);
+	LoadCalibration();
 }
 
 bool CalibrationRequested(void)
@@ -60,8 +65,6 @@ bool CalibrationRequested(void)
 	{
 		asm("nop");
 	}
-
-	// TODO failure case ?
 
 	if(InitialPilotInput.throttlePercentage > 50.0f)
 	{
@@ -77,83 +80,101 @@ void WaitUntilPilotReady(void)
 	PilotResult_t PilotInput;
 
 	do{
-		
+
 		while ( PilotInstructions_ComputePilotResult(&PilotInput) == AAQUAD_BUSY)
 		{
 			asm("nop");
 		}
-		
-	} while ( PilotInput.throttlePercentage > MAX_VALUE_NO_PROP_SPIN);
 
+	} while ( PilotInput.throttlePercentage > MAX_VALUE_NO_PROP_SPIN);
 
 }
 
-void GetCalibration(PilotResult_t *PilotCalibration, SensorResults_t *SensorCalibration)
+void GetCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration)
 {
-
-	SensorCalibration->xAccAngle = 0.0f;
-	SensorCalibration->yAccAngle = 0.0f;
-	SensorCalibration->xGyroRate = 0.0f;
-	SensorCalibration->yGyroRate = 0.0f;
-	SensorCalibration->zGyroRate = 0.0f;
-
 	PilotCalibration->xPercentage = 0.0f;
 	PilotCalibration->yPercentage = 0.0f;
 	PilotCalibration->zPercentage = 0.0f;
 
+	*altitudeCalibration = 0;
+
 	PilotResult_t tempPilotResult = {0};
-	SensorResults_t tempSensorResult = {0};
+	float tempAltitude;
 
 	const uint8_t nSamplesForReliableAverage = 100;
 
 	for (int i = 0; i < nSamplesForReliableAverage; i++)
 	{
-		while ( PilotInstructions_ComputePilotResult(&tempPilotResult) == AAQUAD_BUSY)
+		Altitude_BeginMeasurement();
+
+		while ( PilotInstructions_ComputePilotResult(&tempPilotResult) == AAQUAD_BUSY )
 		{
 			asm("nop");
 		}
 
-		SensorData_GetResult(&tempSensorResult);
-
-		SensorCalibration->xAccAngle += tempSensorResult.xAccAngle;
-		SensorCalibration->yAccAngle += tempSensorResult.yAccAngle;
-		SensorCalibration->xGyroRate += tempSensorResult.xGyroRate;
-		SensorCalibration->yGyroRate += tempSensorResult.yGyroRate;
-		SensorCalibration->zGyroRate += tempSensorResult.zGyroRate;
+		while ( Altitude_Get(&tempAltitude) == AAQUAD_BUSY )
+		{
+			asm("nop");
+		}
 
 		PilotCalibration->xPercentage += tempPilotResult.xPercentage;
 		PilotCalibration->yPercentage += tempPilotResult.yPercentage;
 		PilotCalibration->zPercentage += tempPilotResult.zPercentage;
+		PilotCalibration->throttlePercentage += tempPilotResult.throttlePercentage;
 
+		*altitudeCalibration += tempAltitude;
 	}
-
-	SensorCalibration->xAccAngle /= (float) nSamplesForReliableAverage;
-	SensorCalibration->yAccAngle /= (float) nSamplesForReliableAverage;
-	SensorCalibration->xGyroRate /= (float) nSamplesForReliableAverage;
-	SensorCalibration->yGyroRate /= (float) nSamplesForReliableAverage;
-	SensorCalibration->zGyroRate /= (float) nSamplesForReliableAverage;
 
 	PilotCalibration->xPercentage /= (float) nSamplesForReliableAverage;
 	PilotCalibration->yPercentage /= (float) nSamplesForReliableAverage;
 	PilotCalibration->zPercentage /= (float) nSamplesForReliableAverage;
+	PilotCalibration->throttlePercentage /= (float) nSamplesForReliableAverage;
 
+	*altitudeCalibration /= (float) nSamplesForReliableAverage;
 }
 
-void SaveCalibration(PilotResult_t *PilotCalibration, SensorResults_t *SensorCalibration)
+void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration)
 {
 	eeprom_write_block( (const void *) PilotCalibration, (void *) EEPROM_START_ADDRESS, sizeof(PilotResult_t) );
-	eeprom_write_block( (const void *) SensorCalibration, (void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(SensorResults_t) );
+	eeprom_write_block( (const void *) altitudeCalibration, (void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(float) );
+}
+
+static void GetInitialAzimuth(void)
+{
+	ImuData_t ImuData = {0};
+	EulerXYZ_t EulerAngles = {0};
+
+	const int nSamplesForReliableAverage = 1000;
+
+	for (int i = 0; i < nSamplesForReliableAverage; i++)
+	{
+		Imu_BeginRead();
+
+		while ( Imu_GetResult(&ImuData) == AAQUAD_BUSY)
+		{
+			asm("nop");
+		}
+
+		MahonyAHRSupdate(ImuData.gyrX, ImuData.gyrY, ImuData.gyrZ, ImuData.accX, ImuData.accY, ImuData.accZ, ImuData.magX, ImuData.magY, ImuData.magZ);
+
+		quat2Euler(q0, q1, q2, q3, &EulerAngles);
+
+		initialAzimuth += EulerAngles.psi;
+	}
+
+	initialAzimuth /= (float) nSamplesForReliableAverage;
 }
 
 void LoadCalibration(void)
 {
 	PilotResult_t PilotCalibration = {0};
-	SensorResults_t SensorCalibration = {0};
+	float altitudeCalibration;
 
 	eeprom_read_block( (void *) &PilotCalibration, (const void *) EEPROM_START_ADDRESS, sizeof(PilotResult_t));
-	eeprom_read_block( (void *) &SensorCalibration, (const void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(SensorResults_t));
+	eeprom_read_block( (void *) &altitudeCalibration, (const void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(float));
 
+	PilotCalibration.zPercentage -= ((initialAzimuth * 100.0f) / MAX_Z_THROW);
 	PilotInstructions_LoadCalibration(&PilotCalibration);
-	SensorData_LoadCalibration(&SensorCalibration);
 
+	Altitude_LoadCalibration(altitudeCalibration);
 }

@@ -23,6 +23,8 @@
 static float measuredAltitude;
 static bool dataReady;
 
+static float systematicError;
+
 /**********************************************************
  * Code
  *********************************************************/
@@ -45,6 +47,11 @@ void Altitude_Init(void)
     PCMSK0 |= (1 << PCINT0);
 }
 
+void Altitude_LoadCalibration(float altitudeCalibration)
+{
+	systematicError = altitudeCalibration;
+}
+
 void Altitude_BeginMeasurement(void)
 {
 	TCNT0 = 0;
@@ -61,7 +68,7 @@ int Altitude_Get(float *altitude)
 
     dataReady = false;
 
-    *altitude = measuredAltitude;
+    *altitude = measuredAltitude - systematicError;
 
     return AAQUAD_SUCCEEDED;
 }
