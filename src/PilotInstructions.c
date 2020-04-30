@@ -301,9 +301,9 @@ static void SetAllDataOld(void)
 
 ISR(INT0_vect)		// aileron
 {
-	previousYTimestamp = newestYTimestamp;
-	newestYTimestamp = TCNT1;
-	NewDataAvailable.y = true;
+	previousXTimestamp = newestXTimestamp;
+	newestXTimestamp = TCNT1;
+	NewDataAvailable.x = true;
 }
 
 ISR(INT1_vect)		// throttle
@@ -323,7 +323,7 @@ ISR(PCINT1_vect)	// rudder
 
 ISR(PCINT2_vect)	// elevator
 {
-	previousXTimestamp = newestXTimestamp;
-	newestXTimestamp = TCNT1;
-	NewDataAvailable.x = true;
+	previousYTimestamp = newestYTimestamp;
+	newestYTimestamp = TCNT1;
+	NewDataAvailable.y = true;
 }
