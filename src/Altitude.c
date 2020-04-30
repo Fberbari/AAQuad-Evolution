@@ -22,6 +22,7 @@
 
 static float measuredAltitude;
 static bool dataReady;
+static bool inProgress;
 
 static float systematicError;
 
@@ -54,9 +55,16 @@ void Altitude_LoadCalibration(float altitudeCalibration)
 
 void Altitude_BeginMeasurement(void)
 {
+    if (inProgress)
+    {
+        return;
+    }
+
 	TCNT0 = 0;
     PORTB |= (1 << TRIG_PIN);
 	TCCR0B = (1 << CS00);   // Start timer 0 with no prescaler
+
+    inProgress = true;
 }
 
 int Altitude_Get(float *altitude)
@@ -102,6 +110,7 @@ ISR(PCINT0_vect)
         float distance = (secondsOfTravel * SPEED_OF_SOUND) / 2.0f;
         measuredAltitude = distance;
         dataReady = true;
+        inProgress = false;
     }
 
 	previousTimestamp = thisTimestamp;

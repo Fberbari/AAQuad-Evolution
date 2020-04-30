@@ -37,9 +37,9 @@
 #define MAG_NORMAL_MODE_CMD 0x19
 
 #define ACC_RANGE_8G 0x08
-#define ACC_ODR_200_OSR4 0x09	// samples are taken at 200 hz but every 4 are averaged.
+#define ACC_ODR_800_OSR4 0x0A	// samples are taken at 800 hz but every 4 are averaged. TODO the magnetometer is really difficult. And I suspect there is still a lot wrong with it.
 #define GYRO_RANGE_1000	 0x01
-#define GYRO_ODR_200_OSR4 0x09
+#define GYRO_ODR_800_OSR4 0x0A
 #define MAG_SETUP_EN 0x80
 #define MAG_SETUP_DIS 0x00
 #define REP_XY_REGULAR_PRESET 0x04
@@ -160,7 +160,7 @@ static void ConfigAcc(void)
 
 	SPI_BeginTransaction();
 	SPI_ReadWriteBlocking(WRITE_BIT | ACC_CONF_REG);
-	SPI_ReadWriteBlocking(ACC_ODR_200_OSR4);
+	SPI_ReadWriteBlocking(ACC_ODR_800_OSR4);
 	SPI_EndTransaction();
 
 	_delay_ms(TIME_BETWEEN_WRITES_MS);
@@ -177,7 +177,7 @@ static void ConfigGyro(void)
 
 	SPI_BeginTransaction();
 	SPI_ReadWriteBlocking(WRITE_BIT | GYR_CONF_REG);
-	SPI_ReadWriteBlocking(ACC_ODR_200_OSR4);
+	SPI_ReadWriteBlocking(ACC_ODR_800_OSR4);
 	SPI_EndTransaction();
 
 	_delay_ms(TIME_BETWEEN_WRITES_MS);

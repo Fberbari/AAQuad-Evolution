@@ -14,7 +14,7 @@
 #define MODE_1_REG 0x00
 #define LED0_ON_L_REG 0x06
 
-#define PRESCALER_50_HZ 0x79
+#define PRESCALER_200_HZ 0x1E
 #define CLK_ON_AUTO_INCREMENT_ENABLE 0x21
 
 union MotorPercentBytesRepresentation
@@ -59,7 +59,7 @@ void PwmChip_Init(void)
 	I2C_BlockUntilReady();
 	I2C_SendSlaveRegister(PRESCALE_REG);
 	I2C_BlockUntilReady();
-	I2C_SendData(PRESCALER_50_HZ);
+	I2C_SendData(PRESCALER_200_HZ);
 	I2C_BlockUntilReady();
 	I2C_RepeatStart();
 	I2C_BlockUntilReady();
@@ -111,6 +111,8 @@ static void encodeMotor(float motorPercent, uint8_t* instruction)
 	motorBytes.bytes = (uint16_t) (motorPercent * 2.05f);
 
 	motorBytes.bytes += 205;	// 205 is the value corresponding to 0 for the esc
+
+	motorBytes.bytes *= 4;
 
 	instruction[0] = motorBytes.byte[0];
 	instruction[1] = motorBytes.byte[1];

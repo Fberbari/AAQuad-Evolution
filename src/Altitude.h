@@ -22,6 +22,8 @@ void Altitude_LoadCalibration(float altitudeCalibration);
 /**
 * Begins the process of measuring the altitude.
 * Call this function synchronously.
+* The user may call this at any rate they wish without fear of burdening the hardware, however, the sensor can only collect data at 
+* roughly 20 Hz so that is how often the number will actually be updated.
 * This is a non blocking function that returns right away.
 */
 void Altitude_BeginMeasurement(void);

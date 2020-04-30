@@ -29,7 +29,7 @@ typedef enum state
 
 }Controller_State_t;
 
-#define TIMER_VAL_20_MS (F_CPU / 400)   // assuming clk divider of 8.   // TODO run this off of common's CTRL_LOOP_PERIOD
+#define TIMER_VAL_1_PERIOD ((uint16_t) ((float) CTRL_LOOP_PERIOD / (8.0f / (float)F_CPU)))   // assuming clk divider of 8.
 
 /***********************************************************************************************************************
  * Variables
@@ -156,8 +156,7 @@ static void InitData(void)
 static void InitPeriodTimer(void)
 {
     TIMSK4 = (1 << OCIE4A); // interrupt on match
-    OCR4A = TIMER_VAL_20_MS;
-    TCCR4A = (1 << WGM42);  // Timer cleared on a compare match
+    OCR4A = TIMER_VAL_1_PERIOD;
     TCCR4B = (1 << CS41); // clk divided by 8
 }
 
@@ -263,5 +262,6 @@ static Controller_State_t WaitForTimer_State(void)
 
 ISR(TIMER4_COMPA_vect)
 {
+    TCNT4 = 0;
     periodHasPassed = true;
 }

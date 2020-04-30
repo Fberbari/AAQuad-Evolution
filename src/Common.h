@@ -18,7 +18,7 @@
 #define AAQUAD_SUCCEEDED	1
 #define AAQUAD_FAILED 		0 
 
-#define CTRL_LOOP_PERIOD	0.021f	// in seconds
+#define CTRL_LOOP_PERIOD	0.005f	// in seconds
 
 #define MAX_VALUE_NO_PROP_SPIN	12.0f
 #define MOTOR_VALUE_NO_SPIN		2.0f 	// 0 should not be used as a small electrical glitch may produce an undefined (negative) signal and confuse the esc's
