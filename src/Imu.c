@@ -177,7 +177,7 @@ static void ConfigGyro(void)
 
 	SPI_BeginTransaction();
 	SPI_ReadWriteBlocking(WRITE_BIT | GYR_CONF_REG);
-	SPI_ReadWriteBlocking(ACC_ODR_800_OSR4);
+	SPI_ReadWriteBlocking(GYRO_ODR_800_OSR4);
 	SPI_EndTransaction();
 
 	_delay_ms(TIME_BETWEEN_WRITES_MS);
