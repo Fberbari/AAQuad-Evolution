@@ -34,9 +34,9 @@ typedef struct
 
 typedef struct ImuData
 {
-	int16_t gyrX, gyrY, gyrZ;	// data given in rad/s
-	int16_t accX, accY, accZ;	// both mag and acc are arbitrary units
-	int16_t magX, magY, magZ;	// On the current pcb, when looking straight down onto it, x is in the forward direction, y is to the left, and z is up towards your face.
+	float gyrX, gyrY, gyrZ;	// data given in rad/s
+	float accX, accY, accZ;	// both mag and acc are arbitrary units
+	float magX, magY, magZ;	// On the current pcb, when looking straight down onto it, x is in the forward direction, y is to the left, and z is up towards your face.
 
 }ImuData_t;
 
