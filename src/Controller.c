@@ -84,7 +84,7 @@ void Controller_Init(void)
 	currentState = CTRL_TRIGGER_NEW_MEASUREMENTS;
 }
 
-void Controller_Do(void)
+void Controller_DoYourThingAndFlyTheQuadITrustYou(void)
 {
 	Controller_State_t nextState;
 	switch(currentState)

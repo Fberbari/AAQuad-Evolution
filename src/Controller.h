@@ -17,7 +17,7 @@ void Controller_Init(void);
 * Executes a cycle of controller.
 * Meant to be called in an infinite loop.
 */
-void Controller_Do(void);
+void Controller_DoYourThingAndFlyTheQuadITrustYou(void);
 
 
 #endif // _CONTROLLER_H
