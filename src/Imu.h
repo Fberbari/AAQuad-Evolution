@@ -14,6 +14,13 @@
 void Imu_Init(void);
 
 /**
+* Calibrates the IMU to compensate for any offsets and systematic error.
+* Should be called after Init and before IMU data gets used by the main control loop.
+* @param[in]	ImuCalibration 		struct that contains the compensation values.
+*/
+void Imu_LoadCalibration(ImuData_t *ImuCalibration);
+
+/**
 * Begins the process of capturing the imu data.
 * Call this function synchronously.
 * This is a non blocking function that returns right away.

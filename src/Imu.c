@@ -1,7 +1,6 @@
 #include "Imu.h"
 #include "SPI.h"
 
-#include <util/delay.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -37,7 +36,7 @@
 #define MAG_NORMAL_MODE_CMD 0x19
 
 #define ACC_RANGE_8G 0x08
-#define ACC_ODR_800_OSR4 0x0A	// samples are taken at 800 hz but every 4 are averaged. TODO the magnetometer is really difficult. And I suspect there is still a lot wrong with it.
+#define ACC_ODR_800_OSR4 0x0A	// samples are taken at 800 hz but every 4 are averaged.
 #define GYRO_RANGE_1000	 0x01
 #define GYRO_ODR_800_OSR4 0x0A
 #define MAG_SETUP_EN 0x80
@@ -61,6 +60,8 @@
 static uint8_t rawImuData[20];
 static bool dataReady;
 
+static ImuData_t Calibration;
+
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
@@ -83,6 +84,11 @@ void Imu_Init(void)
 	ConfigAcc();
 	ConfigGyro();
 	ConfigMag();
+}
+
+void Imu_LoadCalibration(ImuData_t *ImuCalibration)
+{
+	memcpy(&Calibration, ImuCalibration, sizeof(ImuData_t));
 }
 
 void Imu_BeginRead(void)
@@ -110,15 +116,15 @@ int Imu_GetResult(ImuData_t *ImuData)
 	int16_t accY = *(&(intImuDataPtr[8]));
 	int16_t accZ = *(&(intImuDataPtr[9]));
 
-	ImuData->magX = (float) magX;
-	ImuData->magY = (float) magY;
-	ImuData->magZ = (float) magZ;
-	ImuData->accX = (float) accX;
-	ImuData->accY = (float) accY;
-	ImuData->accZ = (float) accZ;
-	ImuData->gyrX = (float) gyrX / GYRO_RANGE_1000_FACTOR;
-	ImuData->gyrY = (float) gyrY / GYRO_RANGE_1000_FACTOR;
-	ImuData->gyrZ = (float) gyrZ / GYRO_RANGE_1000_FACTOR;
+	ImuData->magX = (float) (magX - Calibration.magX);
+	ImuData->magY = (float) (magY - Calibration.magY);
+	ImuData->magZ = (float) (magZ - Calibration.magZ);
+	ImuData->accX = (float) (accX - Calibration.accX);
+	ImuData->accY = (float) (accY - Calibration.accY);
+	ImuData->accZ = (float) (accZ - Calibration.accZ);
+	ImuData->gyrX = (float) (gyrX / GYRO_RANGE_1000_FACTOR) - Calibration.gyrX;
+	ImuData->gyrY = (float) (gyrY / GYRO_RANGE_1000_FACTOR) - Calibration.gyrY;
+	ImuData->gyrZ = (float) (gyrZ / GYRO_RANGE_1000_FACTOR) - Calibration.gyrZ;
 
 	dataReady = false;
 

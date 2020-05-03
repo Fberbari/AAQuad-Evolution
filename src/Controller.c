@@ -5,6 +5,7 @@
 #include "MahonyAHRS.h"
 #include "Pid.h"
 #include "PwmChip.h"
+#include "Leds.h"
 
 #include "Common.h"
 
@@ -75,6 +76,7 @@ void Controller_Init(void)
     Altitude_Init();
     Pid_Init();
 	PwmChip_Init();
+    Leds_Init();
 
     InitData();
     InitPeriodTimer();

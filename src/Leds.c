@@ -8,35 +8,35 @@
 
 void Leds_Init(void)
 {
-	DDRB |= ((1 << 1) | (1 << 0));
+	DDRD |= ((1 << 5) | (1 << 6));
 }
 
 void Leds_SetLed0(void)
 {
-	PORTB |= (1 << 0);
+	PORTD |= (1 << 5);
 }
 
 void Leds_ClearLed0(void)
 {
-	PORTB &= ~(1 << 0);
+	PORTD &= ~(1 << 5);
 }
 
 void Leds_ToggleLed0(void)
 {
-	PORTB ^= (1 << 0);
+	PORTD ^= (1 << 5);
 }
 
 void Leds_SetLed1(void)
 {
-	PORTB |= (1 << 1);
+	PORTD |= (1 << 6);
 }
 
 void Leds_ClearLed1(void)
 {
-	PORTB &= ~(1 << 1);
+	PORTD &= ~(1 << 6);
 }
 
 void Leds_ToggleLed1(void)
 {
-	PORTB ^= (1 << 1);
+	PORTD ^= (1 << 6);
 }

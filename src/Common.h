@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
+#include <string.h>
 
 /***********************************************************************************************************************
  * Definitions
@@ -22,6 +23,8 @@
 
 #define MAX_VALUE_NO_PROP_SPIN	12.0f
 #define MOTOR_VALUE_NO_SPIN		0.5f 	// 0 should not be used as a small electrical glitch may produce an undefined (negative) signal and confuse the esc's
+
+#define RAD_TO_DEGREE 57.3f
 
 typedef struct
 {
@@ -70,7 +73,7 @@ float Squaref(float num);
 * This function converts a quaternion to the equivalent XYZ euler angles.
 * All angles are given in radians.
 * param[in]			q0,q1,q2,q3			the quaternion we wish to convert to euler angles
-* @param[out]		EulerAngles 		pointer to the result, in meters
+* @param[out]		EulerAngles 		pointer to the result, in radians
 */
 void quat2Euler(float q0, float q1, float q2, float q3, EulerXYZ_t *EulerAngles);
 
@@ -79,7 +82,6 @@ void quat2Euler(float q0, float q1, float q2, float q3, EulerXYZ_t *EulerAngles)
 * param[in]			angVelX, angVelY, angVelZ		The angular velocities of the quad, in rad/s as reported by an onboard gyroscope.
 * param[in]			EulerAngles						The orientation of the quad, in radians.
 * @param[out]		EulerRates 						The derivatives of the euler angles, in rad/s
-* @return			AAQUAD_SUCCEEDED, AAQUAD_BUSY or AAQUAD_FAILED
 */
 void gyro2EulerRates(EulerXYZ_t *EulerAngles, float angVelX, float angVelY, float angVelZ, EulerRates_t *EulerRates);
 
