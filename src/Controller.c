@@ -256,6 +256,8 @@ static Controller_State_t WaitForTimer_State(void)
     {
         periodHasPassed = false;
 
+        Leds_ToggleLed1();
+
         return CTRL_GET_PILOT_INSTRUCTIONS;
     }
 

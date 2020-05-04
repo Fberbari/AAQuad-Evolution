@@ -218,6 +218,8 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 	ImuCalibration->magX /= 360.0f;
 	ImuCalibration->magY /= 360.0f;
 	ImuCalibration->magZ /= 360.0f;
+
+	Leds_ClearLed1();
 }
 
 static void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration)
