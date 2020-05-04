@@ -5,20 +5,20 @@
  **********************************************************************************************************************/
 
 #define kpX 30.0f
-#define kdX 10.0f
+#define kdX 4.0f
 #define kiX 0.2f
 
 #define kpY 30.0f
-#define kdY 10.0f
+#define kdY 4.0f
 #define kiY 0.2f
 
 #define kpZ 20.0f
-#define kdZ 30.0f
+#define kdZ 5.0f
 #define kiZ 0.2f
 
-#define kpA 3.0f
-#define kdA 0.2f
-#define kiA 2.0f
+#define kpA 10.0f
+#define kdA 2.0f
+#define kiA 0.1f
 
 #define TS CTRL_LOOP_PERIOD
 
@@ -31,21 +31,22 @@
 static float xAccumulatedIntegral;
 static float yAccumulatedIntegral;
 static float zAccumulatedIntegral;
-
 static float altitudeAccumulatedIntegral;
+
+static float historicalAltitudeValue[3];
 
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
 static float ComputeHeadingPid(float desired, float actual, float actualRate, float kp, float ki, float kd, float *accumulatedIntegral);
+static float ComputeZPid(float desired, float actual, float actualRate);
 static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles);
 static void ConstrainMotorRanges(float *motors);
 
 /***********************************************************************************************************************
  * Code
  **********************************************************************************************************************/
-
 
 void Pid_Init(void)
 {
@@ -61,20 +62,29 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_
 			motors[i] = MOTOR_VALUE_NO_SPIN;
 		}
 
+		altitudeAccumulatedIntegral = 0.0f;
+		xAccumulatedIntegral = 0.0f;
+		yAccumulatedIntegral = 0.0f;
+		zAccumulatedIntegral = 0.0f;
+		for (int i = 0; i < 3; i++)
+		{
+			historicalAltitudeValue[i] = 0.0f;
+		}
+
 		return AAQUAD_SUCCEEDED;
 	}
 
     float targetXAngle = MAX_X_THROW * (PilotResult->xPercentage / 100.0f);
     float targetYAngle = MAX_Y_THROW * (PilotResult->yPercentage / 100.0f);
     float targetZAngle = MAX_Z_THROW * (PilotResult->zPercentage / 100.0f);
-    float targetAltitude = MAX_ALTITUDE * (PilotResult->throttlePercentage / 100.0f);
+    float targetAltitude = MAX_ALTITUDE * ((PilotResult->throttlePercentage - MAX_VALUE_NO_PROP_SPIN)/ 100.0f);	// TODO map the ranges instead
 
     float rollPercent = ComputeHeadingPid(targetXAngle, EulerAngles->phi, EulerRates->phiDot, kpX, kiX, kdX, &xAccumulatedIntegral);
     float pitchPercent = ComputeHeadingPid(targetYAngle, EulerAngles->theta, EulerRates->thetaDot, kpY, kiY, kdY, &yAccumulatedIntegral);
-    float yawPercent = ComputeHeadingPid(targetZAngle, EulerAngles->psi, EulerRates->psiDot, kpZ, kiZ, kdZ, &zAccumulatedIntegral);
+
+    float yawPercent = ComputeZPid(targetZAngle, EulerAngles->psi, EulerRates->psiDot);
 
     float altitudePercent = ComputeAltitudePid(targetAltitude, altitude, EulerAngles);
-
 
     motors[0] = altitudePercent;
     motors[1] = altitudePercent;
@@ -86,10 +96,10 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_
     motors[2] -= rollPercent;
     motors[3] -= rollPercent;
 
-	motors[0] += pitchPercent;
-    motors[1] -= pitchPercent;
-	motors[2] += pitchPercent;
-	motors[3] -= pitchPercent;
+	motors[0] -= pitchPercent;
+    motors[1] += pitchPercent;
+	motors[2] -= pitchPercent;
+	motors[3] += pitchPercent;
 
 	motors[0] += yawPercent;
     motors[1] -= yawPercent;
@@ -110,18 +120,35 @@ static float ComputeHeadingPid(float desired, float actual, float actualRate, fl
     return ((kp * error) + (ki * (*accumulatedIntegral)) - (kd * actualRate));
 }
 
+static float ComputeZPid(float desired, float actual, float actualRate)
+{
+    float error = desired - actual;
+
+    if (error > (float) M_PI)
+    {
+        error = (desired - actual) - (2.0f * (float) M_PI);
+    }
+    else if (error < ((float) -M_PI))
+    {
+        error = (2.0f * (float) M_PI) + desired - actual;
+    }
+
+    zAccumulatedIntegral += (TS * error); // TODO anti windup ?
+
+    return ((kpZ * error) + (kiZ * (zAccumulatedIntegral)) - (kdZ * actualRate));
+}
+
 static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles)
 {
-    static float historicalValue[3];
 
     float error = desired - actual;
     float altitudeHoldValue = MOTOR_PERCENT_LEVEL_ALTITUDE_HOLD / ((float) cosf(EulerAngles->phi) * (float) cosf(EulerAngles->theta));
 
-    historicalValue[2] = historicalValue[1];
-    historicalValue[1] = historicalValue[0];
-    historicalValue[0] = actual;
+    historicalAltitudeValue[2] = historicalAltitudeValue[1];
+    historicalAltitudeValue[1] = historicalAltitudeValue[0];
+    historicalAltitudeValue[0] = actual;
 
-    float derivative = ((3 * historicalValue[0]) - (4 * historicalValue[1]) + (historicalValue[2])) / TS;
+    float derivative = ((3 * historicalAltitudeValue[0]) - (4 * historicalAltitudeValue[1]) + (historicalAltitudeValue[2])) / TS;
 
     altitudeAccumulatedIntegral += (TS * error); // TODO anti windup ?
 
