@@ -75,5 +75,5 @@ This project is under the GNU General Public License v3.0
 
 ## Acknowledgements
 
-* SOH Madgwick, who's implementation of the Mahony filter is used in this project.
+* SOH Madgwick, whose implementation of the Mahony filter is used in this project.
 * A shoutout to Anny Wang, who said: "Hey, wouldn't it be cool to build a quadcopter ?" back in 2018, which is how this project began :p.
