@@ -147,7 +147,6 @@ static void GetAltitudeCalibration(float *altitudeCalibration)
 
 static void GetImuCalibration(ImuData_t* ImuCalibration)
 {
-	// TODO I still need a scheme to calibrate the acc.
 
 	const int nSamplesForReliableAverage = 100;
 	const int timeBetweenMeasurements = 5; // ms
@@ -178,14 +177,22 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 		ImuCalibration->gyrX += TempImuData.gyrX;
 		ImuCalibration->gyrY += TempImuData.gyrY;
 		ImuCalibration->gyrZ += TempImuData.gyrZ;
+		ImuCalibration->accX += TempImuData.accX;
+		ImuCalibration->accY += TempImuData.accY;
+		ImuCalibration->accZ += TempImuData.accZ;
 
 	}
 
 	ImuCalibration->gyrX /= (float) nSamplesForReliableAverage;
 	ImuCalibration->gyrY /= (float) nSamplesForReliableAverage;
 	ImuCalibration->gyrZ /= (float) nSamplesForReliableAverage;
+	ImuCalibration->accX /= (float) nSamplesForReliableAverage;
+	ImuCalibration->accY /= (float) nSamplesForReliableAverage;
+	ImuCalibration->accZ /= (float) nSamplesForReliableAverage;
 
-	Imu_LoadCalibration(ImuCalibration);	// We need a calibrated gyro to be able to calibrate the magnetometer.
+	ImuCalibration->accZ -= 1000.0f;	// at calibration, Z needs to read 1g.
+
+	Imu_LoadCalibration(ImuCalibration);	// We need a calibrated gyro to be able to calibrate the magnetometer, might aswell load in the acc calibration aswell.
 
 	while (j < 360)
 	{

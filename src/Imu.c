@@ -52,6 +52,7 @@
 #define MAG_REG_WRITTEN_BIT 2
 
 #define GYRO_RANGE_1000_FACTOR 1879.3f	// LSB/rad/s
+#define ACC_RANGE_8_FACTOR 4.09f	// LSB/mg
 
 /***********************************************************************************************************************
  * Variables
@@ -119,9 +120,9 @@ int Imu_GetResult(ImuData_t *ImuData)
 	ImuData->magX = (float) (magX - Calibration.magX);
 	ImuData->magY = (float) (magY - Calibration.magY);
 	ImuData->magZ = (float) (magZ - Calibration.magZ);
-	ImuData->accX = (float) (accX - Calibration.accX);
-	ImuData->accY = (float) (accY - Calibration.accY);
-	ImuData->accZ = (float) (accZ - Calibration.accZ);
+	ImuData->accX = (float) (accX / ACC_RANGE_8_FACTOR) - Calibration.accX;
+	ImuData->accY = (float) (accY / ACC_RANGE_8_FACTOR) - Calibration.accY;
+	ImuData->accZ = (float) (accZ / ACC_RANGE_8_FACTOR) - Calibration.accZ;
 	ImuData->gyrX = (float) (gyrX / GYRO_RANGE_1000_FACTOR) - Calibration.gyrX;
 	ImuData->gyrY = (float) (gyrY / GYRO_RANGE_1000_FACTOR) - Calibration.gyrY;
 	ImuData->gyrZ = (float) (gyrZ / GYRO_RANGE_1000_FACTOR) - Calibration.gyrZ;
