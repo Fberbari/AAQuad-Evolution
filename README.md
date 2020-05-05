@@ -18,7 +18,7 @@ The ranges for all the mentioned targets are defined in src/Pid.h.
 ## Calibrating the Quad
 ---
 
-1. Before plugging in the battery, tun the transmitter on and put the throttle stick to full power.
+1. Before plugging in the battery, turn the transmitter on and put the throttle stick to full power.
 2. Plug in the battery.
 	* A solid green led will turn on, indicating calibration mode has been successfully entered.
 3. Position the Quad on a level surface and make sure it is completely still.
