@@ -60,6 +60,7 @@ static Controller_State_t ConvertToEuler_State(void);
 static Controller_State_t ComputePidState(void);
 static Controller_State_t SendToPwm_State(void);
 static Controller_State_t WaitForTimer_State(void);
+static Controller_State_t Failed_State(void);
 
 static void InitData(void);
 static void InitPeriodTimer(void);
@@ -123,6 +124,10 @@ void Controller_DoYourThingAndFlyTheQuadITrustYou(void)
 
         case CTRL_WAIT_FOR_TIMER:
             nextState = WaitForTimer_State();
+            break;
+
+        case CTRL_FAILED:
+            nextState = Failed_State();
             break;
 
 		default:
@@ -262,6 +267,13 @@ static Controller_State_t WaitForTimer_State(void)
     }
 
     return CTRL_WAIT_FOR_TIMER;
+}
+
+static Controller_State_t Failed_State(void)
+{
+    PwmChip_EmergencyShutdown();
+
+	return CTRL_FAILED;
 }
 
 ISR(TIMER4_COMPA_vect)

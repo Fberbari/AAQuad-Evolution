@@ -103,6 +103,11 @@ int PwmChip_Send(float *motors)
 	return AAQUAD_SUCCEEDED;
 }
 
+void PwmChip_EmergencyShutdown(void)
+{
+	DisableOutput();
+}
+
 static void encodeMotor(float motorPercent, uint8_t* instruction)
 {
 

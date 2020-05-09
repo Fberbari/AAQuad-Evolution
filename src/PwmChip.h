@@ -25,5 +25,13 @@ void PwmChip_Init(void);
 */
 int PwmChip_Send(float *motors);
 
+/**
+* Turn off all PWM inputs to the ESCs.
+* Call this function in case of catastrophic failure.
+* Does not use the I2C bus, so the shutdown will work even if the failure is a loss of communication with the PWM chip.
+* Once this function is called, there is no way to turn the chip back on, save to cycle the power.
+*/
+void PwmChip_EmergencyShutdown(void);
+
 
 #endif // _PWMCHIP_H
