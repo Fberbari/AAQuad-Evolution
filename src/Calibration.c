@@ -35,7 +35,8 @@ static float GetInitialAzimuth(void);
 
 void Calibration_Calibrate(void)
 {
-
+	_delay_ms(5000);
+	
 	if ( CalibrationRequested() )
 	{
 		Leds_SetLed1();
@@ -260,7 +261,7 @@ static float GetInitialAzimuth(void)
 	ImuData_t ImuData = {0};
 	EulerXYZ_t EulerAngles = {0};
 
-	const int nSamplesForReliableAverage = 2000;
+	const int nSamplesForReliableAverage = 10000;
 
 	for (int i = 0; i < nSamplesForReliableAverage; i++)
 	{

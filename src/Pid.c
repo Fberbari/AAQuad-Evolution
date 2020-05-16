@@ -4,25 +4,25 @@
  * Definitions
  **********************************************************************************************************************/
 
-#define kpX 30.0f
-#define kdX 4.0f
-#define kiX 0.2f
+#define kpX 60.0f
+#define kdX 2.0f
+#define kiX 10.0f
 
-#define kpY 30.0f
-#define kdY 4.0f
-#define kiY 0.2f
+#define kpY 60.0f
+#define kdY 2.0f
+#define kiY 10.0f
 
 #define kpZ 20.0f
 #define kdZ 5.0f
-#define kiZ 0.2f
+#define kiZ 0.0f
 
 #define kpA 10.0f
-#define kdA 2.0f
-#define kiA 0.1f
+#define kdA 6.0f
+#define kiA 0.0f
 
 #define TS CTRL_LOOP_PERIOD
 
-#define MOTOR_PERCENT_LEVEL_ALTITUDE_HOLD 60.0f
+#define TSA ALTITUDE_REFRESH_PERIOD
 
 /***********************************************************************************************************************
  * Variables
@@ -34,6 +34,9 @@ static float zAccumulatedIntegral;
 static float altitudeAccumulatedIntegral;
 
 static float historicalAltitudeValue[3];
+
+static float softStartMotorPercent;
+static bool inFLight;
 
 /***********************************************************************************************************************
  * Prototypes
@@ -50,7 +53,8 @@ static void ConstrainMotorRanges(float *motors);
 
 void Pid_Init(void)
 {
-
+    softStartMotorPercent = 0.0f;
+    inFLight = false;
 }
 
 int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_t *EulerRates, float altitude, float *motors)
@@ -66,12 +70,16 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_
 		xAccumulatedIntegral = 0.0f;
 		yAccumulatedIntegral = 0.0f;
 		zAccumulatedIntegral = 0.0f;
-		for (int i = 0; i < 3; i++)
-		{
-			historicalAltitudeValue[i] = 0.0f;
-		}
+
+        softStartMotorPercent = 0.0f;
+        inFLight = false;
 
 		return AAQUAD_SUCCEEDED;
+	}
+
+	if ( (fabs(EulerAngles->phi) > (M_PI / 6.0f)) || (fabs(EulerAngles->theta) > (M_PI / 6.0f)))
+	{
+		return AAQUAD_FAILED; // TODO a safety check like this is definetly good, but maybe not here.
 	}
 
     float targetXAngle = MAX_X_THROW * (PilotResult->xPercentage / 100.0f);
@@ -101,10 +109,10 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_
 	motors[2] -= pitchPercent;
 	motors[3] += pitchPercent;
 
-	motors[0] += yawPercent;
-    motors[1] -= yawPercent;
-    motors[2] -= yawPercent;
-	motors[3] += yawPercent;
+	motors[0] -= yawPercent;
+    motors[1] += yawPercent;
+    motors[2] += yawPercent;
+	motors[3] -= yawPercent;
 
 	ConstrainMotorRanges(motors);
 
@@ -113,9 +121,12 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_
 
 static float ComputeHeadingPid(float desired, float actual, float actualRate, float kp, float ki, float kd, float *accumulatedIntegral)
 {
-    float error = desired - actual;
+    float error = SignedSquaref(desired - actual);
 
-    *accumulatedIntegral += (TS * error); // TODO anti windup ?
+    if (inFLight)   // accumulating the integral while on the ground would cause it to windup
+    {
+        *accumulatedIntegral += (TS * error);
+    }
 
     return ((kp * error) + (ki * (*accumulatedIntegral)) - (kd * actualRate));
 }
@@ -133,26 +144,62 @@ static float ComputeZPid(float desired, float actual, float actualRate)
         error = (2.0f * (float) M_PI) + desired - actual;
     }
 
-    zAccumulatedIntegral += (TS * error); // TODO anti windup ?
+    if (inFLight) // accumulating the integral while on the ground would cause it to windup
+    {
+        zAccumulatedIntegral += (TS * error);
+    }
 
     return ((kpZ * error) + (kiZ * (zAccumulatedIntegral)) - (kdZ * actualRate));
 }
 
 static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles)
 {
+    static float motorPercentLevelAltitudeHold;
+    static bool newDataHasArrived;
 
-    float error = desired - actual;
-    float altitudeHoldValue = MOTOR_PERCENT_LEVEL_ALTITUDE_HOLD / ((float) cosf(EulerAngles->phi) * (float) cosf(EulerAngles->theta));
+    if ( ! inFLight )
+    {
+        if (actual > 0.03f)
+        {
+            inFLight = true;
 
-    historicalAltitudeValue[2] = historicalAltitudeValue[1];
-    historicalAltitudeValue[1] = historicalAltitudeValue[0];
-    historicalAltitudeValue[0] = actual;
+            motorPercentLevelAltitudeHold = softStartMotorPercent;
 
-    float derivative = ((3 * historicalAltitudeValue[0]) - (4 * historicalAltitudeValue[1]) + (historicalAltitudeValue[2])) / TS;
+            for (int i = 0; i < 3; i++)
+            {
+                historicalAltitudeValue[i] = actual;
+            }
 
-    altitudeAccumulatedIntegral += (TS * error); // TODO anti windup ?
+            softStartMotorPercent = 0.0f;
+        }
 
-    return (altitudeHoldValue + (kpA * error) + (kiA * altitudeAccumulatedIntegral) - (kdA * derivative));
+        softStartMotorPercent += 10.0f * TS;
+
+        return softStartMotorPercent;
+    }
+
+    if (actual != historicalAltitudeValue[0]) // altitude refresh is slower than control loop, so only update result when new data comes in.
+    {
+        historicalAltitudeValue[2] = historicalAltitudeValue[1];
+        historicalAltitudeValue[1] = historicalAltitudeValue[0];
+        historicalAltitudeValue[0] = actual;
+
+        newDataHasArrived = true;
+    }
+
+    float error = desired - historicalAltitudeValue[0];
+    float altitudeHoldValue = motorPercentLevelAltitudeHold;
+
+    float derivative = ((3 * historicalAltitudeValue[0]) - (4 * historicalAltitudeValue[1]) + (historicalAltitudeValue[2])) / TSA;
+
+    if (newDataHasArrived)
+    {
+        altitudeAccumulatedIntegral += (TSA * error);
+    }
+
+    newDataHasArrived = false;
+
+    return (altitudeHoldValue + (kpA * error) + (kiA * altitudeAccumulatedIntegral) - kiA * derivative);
 }
 
 static void ConstrainMotorRanges(float *motors)

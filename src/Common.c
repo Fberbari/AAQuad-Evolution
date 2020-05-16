@@ -20,6 +20,18 @@ float Squaref(float num)
     return num * num;
 }
 
+float SignedSquaref(float num)
+{
+    if (num < 0.0f)
+    {
+        return (-1.0f) * Squaref(num);
+    }
+    else
+    {
+        return Squaref(num);
+    }
+}
+
 void quat2Euler(float q0, float q1, float q2, float q3, EulerXYZ_t *EulerAngles)
 {
     float sinPh_cosT = (-1) * 2 * ((q2 * q3) - (q0 * q1));

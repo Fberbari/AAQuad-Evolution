@@ -8,11 +8,11 @@
  **********************************************************************************************************************/
 
 // The angle that the quadCopter will be at when the aileron/elevator/rudder control sticks are at 100% (in rad)
-#define MAX_X_THROW 0.1745f	
-#define MAX_Y_THROW 0.1745f
+#define MAX_X_THROW 0.52f	
+#define MAX_Y_THROW 0.52f
 #define MAX_Z_THROW	(float) M_PI
 
-#define MAX_ALTITUDE 3	// in meters
+#define MAX_ALTITUDE 1	// in meters
 
 /***********************************************************************************************************************
  * Prototypes

@@ -41,12 +41,12 @@
 #define GYRO_ODR_800_OSR4 0x0A
 #define MAG_SETUP_EN 0x80
 #define MAG_SETUP_DIS 0x00
-#define REP_XY_REGULAR_PRESET 0x04
+#define REP_XY_REGULAR_PRESET 0x04 // TODO there is also a high accuracy preset. Not too sure what that's about.
 #define REP_Z_REGULAR_PRESET 0x0E
 #define MAG_IF_3_DATA_MODE 0x02
 #define MAG_IF_2_DATA_MODE 0x4C
 #define MAG_IF_1_DATA_MODE 0x42
-#define MAG_REFRESH_50_HZ 0x07
+#define MAG_REFRESH_50_HZ 0x07	// TODO mag should refresh at 200 Hz aswell, but I cant seem to get that to work.
 #define MAG_SLEEP_MODE 0x01
 
 #define MAG_REG_WRITTEN_BIT 2

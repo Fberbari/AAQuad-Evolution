@@ -20,6 +20,7 @@
 #define AAQUAD_FAILED 		0 
 
 #define CTRL_LOOP_PERIOD	0.005f	// in seconds
+#define ALTITUDE_REFRESH_PERIOD 0.05f // in seconds
 
 #define MAX_VALUE_NO_PROP_SPIN	12.0f
 #define MOTOR_VALUE_NO_SPIN		0.5f 	// 0 should not be used as a small electrical glitch may produce an undefined (negative) signal and confuse the esc's
@@ -68,6 +69,8 @@ float map(float num, float minInput, float maxInput, float minOutput, float maxO
 float Square(int16_t num);
 
 float Squaref(float num);
+
+float SignedSquaref(float num);
 
 /**
 * This function converts a quaternion to the equivalent XYZ euler angles.
