@@ -44,7 +44,7 @@ static bool inFLight;
 
 static float ComputeHeadingPid(float desired, float actual, float actualRate, float kp, float ki, float kd, float *accumulatedIntegral);
 static float ComputeZPid(float desired, float actual, float actualRate);
-static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles);
+static float ComputeAltitudePid(float desired, float actual, EulerZYX_t *EulerAngles);
 static void ConstrainMotorRanges(float *motors);
 
 /***********************************************************************************************************************
@@ -57,7 +57,7 @@ void Pid_Init(void)
     inFLight = false;
 }
 
-int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_t *EulerRates, float altitude, float *motors)
+int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_t *EulerRates, float altitude, float *motors)
 {
 	if (PilotResult->throttlePercentage < MAX_VALUE_NO_PROP_SPIN)
 	{
@@ -152,7 +152,7 @@ static float ComputeZPid(float desired, float actual, float actualRate)
     return ((kpZ * error) + (kiZ * (zAccumulatedIntegral)) - (kdZ * actualRate));
 }
 
-static float ComputeAltitudePid(float desired, float actual, EulerXYZ_t *EulerAngles)
+static float ComputeAltitudePid(float desired, float actual, EulerZYX_t *EulerAngles)
 {
     static float motorPercentLevelAltitudeHold;
     static bool newDataHasArrived;

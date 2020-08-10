@@ -41,7 +41,7 @@ static Controller_State_t currentState;
 static PilotResult_t PilotResult;
 static ImuData_t ImuData;
 static float altitude;
-static EulerXYZ_t EulerAngles;
+static EulerZYX_t EulerAngles;
 static EulerRates_t EulerRates;
 static float motors[4];
 

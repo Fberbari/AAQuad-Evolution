@@ -17,7 +17,7 @@
 
 #define AAQUAD_BUSY 		2
 #define AAQUAD_SUCCEEDED	1
-#define AAQUAD_FAILED 		0 
+#define AAQUAD_FAILED 		0
 
 #define CTRL_LOOP_PERIOD	0.005f	// in seconds
 #define ALTITUDE_REFRESH_PERIOD 0.05f // in seconds
@@ -50,7 +50,7 @@ typedef struct EulerXYZ
     float theta;
     float psi;
 
-}EulerXYZ_t;
+}EulerZYX_t;
 
 typedef struct EulerRates
 {
@@ -73,12 +73,12 @@ float Squaref(float num);
 float SignedSquaref(float num);
 
 /**
-* This function converts a quaternion to the equivalent XYZ euler angles.
+* This function converts a quaternion to the equivalent ZYX euler angles.
 * All angles are given in radians.
 * param[in]			q0,q1,q2,q3			the quaternion we wish to convert to euler angles
 * @param[out]		EulerAngles 		pointer to the result, in radians
 */
-void quat2Euler(float q0, float q1, float q2, float q3, EulerXYZ_t *EulerAngles);
+void quat2Euler(float q0, float q1, float q2, float q3, EulerZYX_t *EulerAngles);
 
 /**
 * Given the current orientation of an object, and it's angular velocities, this function gives the derivatives of the XYZ euler angles.
@@ -86,6 +86,6 @@ void quat2Euler(float q0, float q1, float q2, float q3, EulerXYZ_t *EulerAngles)
 * param[in]			EulerAngles						The orientation of the quad, in radians.
 * @param[out]		EulerRates 						The derivatives of the euler angles, in rad/s
 */
-void gyro2EulerRates(EulerXYZ_t *EulerAngles, float angVelX, float angVelY, float angVelZ, EulerRates_t *EulerRates);
+void gyro2EulerRates(EulerZYX_t *EulerAngles, float angVelX, float angVelY, float angVelZ, EulerRates_t *EulerRates);
 
 #endif // _COMMON_H

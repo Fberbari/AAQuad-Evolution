@@ -259,7 +259,7 @@ static float GetInitialAzimuth(void)
 {
 	float initialAzimuth = 0.0f;
 	ImuData_t ImuData = {0};
-	EulerXYZ_t EulerAngles = {0};
+	EulerZYX_t EulerAngles = {0};
 
 	const int nSamplesForReliableAverage = 10000;
 

@@ -35,6 +35,6 @@ void Pid_Init(void);
 * @param[out]	motors			An array of 4 floats that each represent a percentage from 0-100 that the associated motor should be powered at to achieve the pilot's intentions.
 * @return 		AAQUAD_SUCCEEDED or AAQUAD_FAILED
 */
-int Pid_Compute(PilotResult_t *PilotResult, EulerXYZ_t *EulerAngles, EulerRates_t *EulerRates, float altitude, float *motors);
+int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_t *EulerRates, float altitude, float *motors);
 
 #endif // _PID_H
