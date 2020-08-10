@@ -216,7 +216,7 @@ static Controller_State_t TriggerNewMeasurements_State(void)
 static Controller_State_t FuseMeasurements_State(void)
 {
     // this module makes the return data available as the global variables q0, q1, q2 and q3
-    MahonyAHRSupdate(ImuData.gyrX, ImuData.gyrY, ImuData.gyrZ, ImuData.accX, ImuData.accY, ImuData.accZ, ImuData.magX, ImuData.magY, ImuData.magZ);
+    MahonyAHRSupdateIMU(ImuData.gyrX, ImuData.gyrY, ImuData.gyrZ, ImuData.accX, ImuData.accY, ImuData.accZ);
 
     return CTRL_CONVERT_TO_EULER;
 }
