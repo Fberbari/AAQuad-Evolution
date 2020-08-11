@@ -4,13 +4,13 @@
  * Definitions
  **********************************************************************************************************************/
 
-#define kpX 30.0f
-#define kdX 2.0f
-#define kiX 10.0f
+#define kpX 50.0f
+#define kdX 8.0f
+#define kiX 0.0f
 
-#define kpY 30.0f
-#define kdY 2.0f
-#define kiY 10.0f
+#define kpY 50.0f
+#define kdY 8.0f
+#define kiY 0.0f
 
 #define kpZ 20.0f
 #define kdZ 5.0f
