@@ -4,11 +4,11 @@
  * Definitions
  **********************************************************************************************************************/
 
-#define kpX 60.0f
+#define kpX 30.0f
 #define kdX 2.0f
 #define kiX 10.0f
 
-#define kpY 60.0f
+#define kpY 30.0f
 #define kdY 2.0f
 #define kiY 10.0f
 
@@ -77,9 +77,9 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_
 		return AAQUAD_SUCCEEDED;
 	}
 
-	if ( (fabs(EulerAngles->phi) > (M_PI / 6.0f)) || (fabs(EulerAngles->theta) > (M_PI / 6.0f)))
+	if ( (fabs(EulerAngles->phi) > (M_PI / 3.0f)) || (fabs(EulerAngles->theta) > (M_PI / 3.0f)))
 	{
-		return AAQUAD_FAILED; // TODO a safety check like this is definetly good, but maybe not here.
+		return AAQUAD_FAILED; // TODO a safety check like this is definitely good, but maybe not here.
 	}
 
     float targetXAngle = MAX_X_THROW * (PilotResult->xPercentage / 100.0f);
@@ -99,21 +99,20 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_
     motors[2] = altitudePercent;
     motors[3] = altitudePercent;
 
-	motors[0] += rollPercent;
-	motors[1] += rollPercent;
-    motors[2] -= rollPercent;
-    motors[3] -= rollPercent;
+	motors[0] -= rollPercent;
+	motors[1] -= rollPercent;
+    motors[2] += rollPercent;
+    motors[3] += rollPercent;
 
-	motors[0] -= pitchPercent;
-    motors[1] += pitchPercent;
-	motors[2] -= pitchPercent;
-	motors[3] += pitchPercent;
+	motors[0] += pitchPercent;
+    motors[1] -= pitchPercent;
+	motors[2] += pitchPercent;
+	motors[3] -= pitchPercent;
 
 	motors[0] -= yawPercent;
     motors[1] += yawPercent;
     motors[2] += yawPercent;
 	motors[3] -= yawPercent;
-
 	ConstrainMotorRanges(motors);
 
 	return AAQUAD_SUCCEEDED;
@@ -121,7 +120,7 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_
 
 static float ComputeHeadingPid(float desired, float actual, float actualRate, float kp, float ki, float kd, float *accumulatedIntegral)
 {
-    float error = SignedSquaref(desired - actual);
+    float error = desired - actual;
 
     if (inFLight)   // accumulating the integral while on the ground would cause it to windup
     {
@@ -154,6 +153,9 @@ static float ComputeZPid(float desired, float actual, float actualRate)
 
 static float ComputeAltitudePid(float desired, float actual, EulerZYX_t *EulerAngles)
 {
+	// TODO: In the future, you should be dividing the altitudeHoldValue by the euler angles to ensure enough thrust to keep the aircraft at the right height.
+	(void) EulerAngles;
+
     static float motorPercentLevelAltitudeHold;
     static bool newDataHasArrived;
 

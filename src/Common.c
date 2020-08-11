@@ -41,8 +41,12 @@ void quat2Euler(float q0, float q1, float q2, float q3, EulerZYX_t *EulerAngles)
 
 void gyro2EulerRates(EulerZYX_t *EulerAngles, float angVelX, float angVelY, float angVelZ, EulerRates_t *EulerRates)
 {
-    EulerRates->phiDot = (angVelX * (float) cosf(EulerAngles->psi) / (float) cosf(EulerAngles->theta)) - (angVelY * (float) sinf(EulerAngles->psi) / (float) cosf(EulerAngles->theta));
-    EulerRates->thetaDot = (angVelX * (float) sinf(EulerAngles->psi)) + (angVelY * (float) cosf(EulerAngles->psi));
-    EulerRates->psiDot = (angVelX * (-1.0f) * (float) tanf(EulerAngles->theta) * (float) cosf(EulerAngles->psi)) +(angVelY * (float) tanf(EulerAngles->theta) * (float) sinf(EulerAngles->psi)) + angVelZ;
+    // These are not truly the derivatives of the Euler angles, but they are really close for small angles.
+
+    (void) EulerAngles;
+
+    EulerRates->phiDot = angVelX;
+    EulerRates->thetaDot = angVelY;
+    EulerRates->psiDot = angVelZ;
 }
 

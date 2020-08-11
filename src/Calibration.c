@@ -36,7 +36,7 @@ static float GetInitialAzimuth(void);
 void Calibration_Calibrate(void)
 {
 	_delay_ms(5000);
-	
+
 	if ( CalibrationRequested() )
 	{
 		Leds_SetLed1();
@@ -250,11 +250,15 @@ void LoadCalibration(void)
 	Altitude_LoadCalibration(altitudeCalibration);
 	Imu_LoadCalibration(&ImuCalibration);
 
+    #if 0
 	float initialAzimuth = GetInitialAzimuth();
 	PilotCalibration.zPercentage -= ((initialAzimuth * 100.0f) / MAX_Z_THROW);
+    #endif
+
 	PilotInstructions_LoadCalibration(&PilotCalibration);
 }
 
+#if 0
 static float GetInitialAzimuth(void)
 {
 	float initialAzimuth = 0.0f;
@@ -286,3 +290,4 @@ static float GetInitialAzimuth(void)
 
 	return initialAzimuth;
 }
+#endif
