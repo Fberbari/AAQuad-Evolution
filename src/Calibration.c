@@ -27,7 +27,10 @@ static void GetAltitudeCalibration(float *altitudeCalibration);
 static void GetImuCalibration(ImuData_t* ImuCalibration);
 static void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration);
 static void LoadCalibration(void);
+
+#if 0
 static float GetInitialAzimuth(void);
+#endif
 
 /***********************************************************************************************************************
  * Code
@@ -150,12 +153,15 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 {
 
 	const int nSamplesForReliableAverage = 100;
+	ImuData_t TempImuData;
+	
+	#if 0
 	const int timeBetweenMeasurements = 5; // ms
 	float degreeOfRotation = 0.0f;
-	ImuData_t TempImuData;
 	int j = 0;
 	int ledToggleCnt = 0;
 	const float ledTimeToToggle = 0.25f;
+	#endif
 
 	ImuCalibration->accX = 0.0f;
 	ImuCalibration->accY = 0.0f;
@@ -193,6 +199,9 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 
 	ImuCalibration->accZ -= 1000.0f;	// at calibration, Z needs to read 1g.
 
+
+#if 0   // for the moment, I am operating without magnetic field data
+
 	Imu_LoadCalibration(ImuCalibration);	// We need a calibrated gyro to be able to calibrate the magnetometer, might aswell load in the acc calibration aswell.
 
 	while (j < 360)
@@ -228,6 +237,7 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 	ImuCalibration->magZ /= 360.0f;
 
 	Leds_ClearLed1();
+#endif
 }
 
 static void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration)
@@ -250,7 +260,7 @@ void LoadCalibration(void)
 	Altitude_LoadCalibration(altitudeCalibration);
 	Imu_LoadCalibration(&ImuCalibration);
 
-    #if 0
+    #if 0  // Since we are operating with no magnetic field data, the zero yaw point becomes where we are initially pointing; not a measurement relative to the magnetic north.
 	float initialAzimuth = GetInitialAzimuth();
 	PilotCalibration.zPercentage -= ((initialAzimuth * 100.0f) / MAX_Z_THROW);
     #endif

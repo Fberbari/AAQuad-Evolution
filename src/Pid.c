@@ -4,21 +4,21 @@
  * Definitions
  **********************************************************************************************************************/
 
-#define kpX 50.0f
-#define kdX 8.0f
-#define kiX 0.0f
+#define kpX 20.0f
+#define kdX 2.0f
+#define kiX 1.0f
 
-#define kpY 50.0f
-#define kdY 8.0f
-#define kiY 0.0f
+#define kpY 20.0f
+#define kdY 2.0f
+#define kiY 1.0f
 
 #define kpZ 20.0f
-#define kdZ 5.0f
-#define kiZ 0.0f
+#define kdZ 2.0f
+#define kiZ 1.0f
 
-#define kpA 10.0f
-#define kdA 6.0f
-#define kiA 0.0f
+#define kpA 15.0f
+#define kdA 30.0f
+#define kiA 1.0f
 
 #define TS CTRL_LOOP_PERIOD
 
@@ -72,14 +72,10 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_
 		zAccumulatedIntegral = 0.0f;
 
         softStartMotorPercent = 0.0f;
+
         inFLight = false;
 
 		return AAQUAD_SUCCEEDED;
-	}
-
-	if ( (fabs(EulerAngles->phi) > (M_PI / 3.0f)) || (fabs(EulerAngles->theta) > (M_PI / 3.0f)))
-	{
-		return AAQUAD_FAILED; // TODO a safety check like this is definitely good, but maybe not here.
 	}
 
     float targetXAngle = MAX_X_THROW * (PilotResult->xPercentage / 100.0f);
@@ -113,6 +109,7 @@ int Pid_Compute(PilotResult_t *PilotResult, EulerZYX_t *EulerAngles, EulerRates_
     motors[1] += yawPercent;
     motors[2] += yawPercent;
 	motors[3] -= yawPercent;
+
 	ConstrainMotorRanges(motors);
 
 	return AAQUAD_SUCCEEDED;
@@ -180,7 +177,7 @@ static float ComputeAltitudePid(float desired, float actual, EulerZYX_t *EulerAn
         return softStartMotorPercent;
     }
 
-    if (actual != historicalAltitudeValue[0]) // altitude refresh is slower than control loop, so only update result when new data comes in.
+    if ( ! isnan(actual) ) // altitude refresh is slower than control loop, so only update result when new data comes in.
     {
         historicalAltitudeValue[2] = historicalAltitudeValue[1];
         historicalAltitudeValue[1] = historicalAltitudeValue[0];
@@ -201,7 +198,7 @@ static float ComputeAltitudePid(float desired, float actual, EulerZYX_t *EulerAn
 
     newDataHasArrived = false;
 
-    return (altitudeHoldValue + (kpA * error) + (kiA * altitudeAccumulatedIntegral) - kiA * derivative);
+    return (altitudeHoldValue + (kpA * error) + (kiA * altitudeAccumulatedIntegral) - (kdA * derivative));
 }
 
 static void ConstrainMotorRanges(float *motors)

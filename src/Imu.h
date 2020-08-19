@@ -29,12 +29,12 @@ void Imu_BeginRead(void);
 
 /**
 * Gets the information about the quad's orientation.
-* The maagnetometer data returned by this function has NOT been compensated for temperature. TODO maybe I should ?
+* The magnetometer data returned by this function has NOT been compensated for temperature. TODO maybe I should ?
 * This is a non blocking function that returns right away with the results if they are available or an
 * indication that they are still being collected if they aren't.
 * Returns succeeded if the data was successfully collected, busy if new data is not yet available, failed otherwise.
 * The contents of the [out] parameter are only modified in the case of a successful return.
-* Accelerometer data is given in mg (1 g being earth's acceleration) and gyroscope data is given in rad/s while 
+* Accelerometer data is given in mg (1 g being earth's acceleration) and gyroscope data is given in rad/s while
 * magnetometer data is given in arbitrary units (in anticipation that the vector will be normalized anyway).
 * @param[out]		imuData 		pointer to the results struct
 * @return			AAQUAD_SUCCEEDED, AAQUAD_BUSY or AAQUAD_FAILED

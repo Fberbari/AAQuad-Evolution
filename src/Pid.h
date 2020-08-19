@@ -8,7 +8,7 @@
  **********************************************************************************************************************/
 
 // The angle that the quadCopter will be at when the aileron/elevator/rudder control sticks are at 100% (in rad)
-#define MAX_X_THROW 0.52f	
+#define MAX_X_THROW 0.52f
 #define MAX_Y_THROW 0.52f
 #define MAX_Z_THROW	(float) M_PI
 
@@ -19,7 +19,7 @@
  **********************************************************************************************************************/
 
 /**
-* Initialises internal parameters
+* Initializes internal parameters
 * Should be called once before anything is attempted to be done with the module
 */
 void Pid_Init(void);
