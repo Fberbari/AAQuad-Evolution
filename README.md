@@ -99,7 +99,7 @@ Once the pcb is built, power it by connecting the ESC to the battery and plug in
 
 ## License
 
-This project is under the GNU General Public License v3.0
+This project is under the MIT license.
 
 ## Acknowledgements
 
