@@ -12,7 +12,7 @@
 #define MAX_Y_THROW 0.52f
 #define MAX_Z_THROW	(float) M_PI
 
-#define MAX_ALTITUDE 1	// in meters
+#define MAX_ALTITUDE 5	// in meters
 
 /***********************************************************************************************************************
  * Prototypes

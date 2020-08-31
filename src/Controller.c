@@ -6,7 +6,6 @@
 #include "Pid.h"
 #include "PwmChip.h"
 #include "Leds.h"
-#include "LowPassFilter.h"
 
 #include "Common.h"
 
@@ -31,8 +30,6 @@ typedef enum state
 
 }Controller_State_t;
 
-#define ALTITUDE_FILTER_WINDOW_SIZE 5
-
 #define TIMER_VAL_1_PERIOD ((uint16_t) ((float) CTRL_LOOP_PERIOD / (8.0f / (float)F_CPU)))   // assuming clk divider of 8.
 
 /***********************************************************************************************************************
@@ -44,7 +41,6 @@ static Controller_State_t currentState;
 static PilotResult_t PilotResult;
 static ImuData_t ImuData;
 static float altitude;
-static LowPassFilter_t AltitudeFilter;
 static EulerZYX_t EulerAngles;
 static EulerRates_t EulerRates;
 static float motors[4];
@@ -82,8 +78,6 @@ void Controller_Init(void)
     Pid_Init();
 	PwmChip_Init();
     Leds_Init();
-
-    AltitudeFilter = LowPassFilter_CreateFilter(ALTITUDE_FILTER_WINDOW_SIZE);
 
     InitData();
     InitPeriodTimer();
@@ -200,25 +194,18 @@ static Controller_State_t GetImuData_State(void)
 
 static Controller_State_t GetAltitude_State(void)
 {
-    float unfilteredAltitude;
 
-    int r = Altitude_Get(&unfilteredAltitude);
+    int r = Altitude_Get(&altitude);
 
-    // only update the filter on succeeded (not on busy)
-    if (r == AAQUAD_SUCCEEDED)
+    if (r == AAQUAD_FAILED)
     {
-        altitude = LowPassFilter_Execute(AltitudeFilter, unfilteredAltitude);
+        return CTRL_FAILED;
     }
 
     else if (r == AAQUAD_BUSY)
     {
         // This way, PID will know no new data is available.
         altitude = NAN;
-    }
-
-    else if(r == AAQUAD_FAILED)
-    {
-        return CTRL_FAILED;
     }
 
     return CTRL_TRIGGER_NEW_MEASUREMENTS;

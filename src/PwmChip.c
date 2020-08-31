@@ -17,6 +17,8 @@
 #define PRESCALER_200_HZ 0x1E
 #define CLK_ON_AUTO_INCREMENT_ENABLE 0x21
 
+#define I2C_BUS 0
+
 union MotorPercentBytesRepresentation
 {
 	uint16_t bytes;
@@ -50,28 +52,28 @@ void PwmChip_Init(void)
 	SetOEPinAsOutput();
 	DisableOutput();
 
-	I2C_Init();
-	I2C_DisableInterrupt();
+	I2C_Init(I2C_BUS);
+	I2C_DisableInterrupt(I2C_BUS);
 
-	I2C_Start();
-	I2C_BlockUntilReady();
-	I2C_SendSlaveAddressWrite(PWM_SLAVE_ADDRESS);
-	I2C_BlockUntilReady();
-	I2C_SendSlaveRegister(PRESCALE_REG);
-	I2C_BlockUntilReady();
-	I2C_SendData(PRESCALER_200_HZ);
-	I2C_BlockUntilReady();
-	I2C_RepeatStart();
-	I2C_BlockUntilReady();
-	I2C_SendSlaveAddressWrite(PWM_SLAVE_ADDRESS);
-	I2C_BlockUntilReady();
-	I2C_SendSlaveRegister(MODE_1_REG);
-	I2C_BlockUntilReady();
-	I2C_SendData(CLK_ON_AUTO_INCREMENT_ENABLE);
-	I2C_BlockUntilReady();
-	I2C_Stop();
+	I2C_Start(I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_SendSlaveAddressWrite(PWM_SLAVE_ADDRESS, I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_SendSlaveRegister(PRESCALE_REG, I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_SendData(PRESCALER_200_HZ, I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_RepeatStart(I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_SendSlaveAddressWrite(PWM_SLAVE_ADDRESS, I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_SendSlaveRegister(MODE_1_REG, I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_SendData(CLK_ON_AUTO_INCREMENT_ENABLE, I2C_BUS);
+	I2C_BlockUntilReady(I2C_BUS);
+	I2C_Stop(I2C_BUS);
 
-	I2C_EnableInterrupt();
+	I2C_EnableInterrupt(I2C_BUS);
 
 	InitMotorsToZero();
 	EnableOutput();
@@ -98,7 +100,7 @@ int PwmChip_Send(float *motors)
 	encodeMotor(motors[2], &(I2CSendBytes[10]));
 	encodeMotor(motors[3], &(I2CSendBytes[14]));
 
-	I2C_Start();
+	I2C_Start(I2C_BUS);
 
 	return AAQUAD_SUCCEEDED;
 }
@@ -161,26 +163,26 @@ ISR(TWI0_vect)
 {
 	static int8_t i;
 
-	switch (STATUS)
+	switch (I2C_STATUS_BUS_0)
 	{
 		case START_SUCCEEDED :
-			I2C_SendSlaveAddressWrite(PWM_SLAVE_ADDRESS);
+			I2C_SendSlaveAddressWrite(PWM_SLAVE_ADDRESS, I2C_BUS);
 			break;
 
 		case SLAVE_WRITE_SUCCEEDED :
-			I2C_SendSlaveRegister(LED0_ON_L_REG);
+			I2C_SendSlaveRegister(LED0_ON_L_REG, I2C_BUS);
 			break;
 
 		case DATA_TRANSMIT_SUCCEEDED :
 			if(i == 16)
 			{
-				I2C_Stop();
+				I2C_Stop(I2C_BUS);
 				i = 0;
 				I2CIsBusy = false;
 			}
 			else
 			{
-				I2C_SendData(I2CSendBytes[i]);
+				I2C_SendData(I2CSendBytes[i], I2C_BUS);
 				i++;
 			}
 			break;

@@ -15,17 +15,23 @@
 
 #define EEPROM_START_ADDRESS	(const uint8_t *) 0x0
 
+typedef struct
+{
+	float ultrasonic;
+	float altimeter;
+}AltitudeCalibration_t;
+
 /***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
 static bool CalibrationRequested(void);
 static void WaitUntilPilotReady(void);
-static void GetCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration);
+static void GetCalibration(PilotResult_t *PilotCalibration, AltitudeCalibration_t *AltitudeCalibration, ImuData_t* ImuCalibration);
 static void GetPilotCalibration(PilotResult_t *PilotCalibration);
-static void GetAltitudeCalibration(float *altitudeCalibration);
+static void GetAltitudeCalibration(AltitudeCalibration_t *AltitudeCalibration);
 static void GetImuCalibration(ImuData_t* ImuCalibration);
-static void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration);
+static void SaveCalibration(PilotResult_t *PilotCalibration, AltitudeCalibration_t *AltitudeCalibration, ImuData_t* ImuCalibration);
 static void LoadCalibration(void);
 
 #if 0
@@ -47,7 +53,7 @@ void Calibration_Calibrate(void)
 		Leds_ClearLed1();
 
 		PilotResult_t PilotCalibration = {0};
-		float altitudeCalibration = 0.0f;
+		AltitudeCalibration_t altitudeCalibration = {0};
 		ImuData_t ImuCalibration = {0};
 
 		GetCalibration(&PilotCalibration, &altitudeCalibration, &ImuCalibration);
@@ -91,10 +97,10 @@ void WaitUntilPilotReady(void)
 
 }
 
-static void GetCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration)
+static void GetCalibration(PilotResult_t *PilotCalibration, AltitudeCalibration_t *AltitudeCalibration, ImuData_t* ImuCalibration)
 {
 	GetPilotCalibration(PilotCalibration);
-	GetAltitudeCalibration(altitudeCalibration);
+	GetAltitudeCalibration(AltitudeCalibration);
 	GetImuCalibration(ImuCalibration);
 }
 
@@ -127,26 +133,43 @@ static void GetPilotCalibration(PilotResult_t *PilotCalibration)
 	PilotCalibration->throttlePercentage /= (float) nSamplesForReliableAverage;
 }
 
-static void GetAltitudeCalibration(float *altitudeCalibration)
+static void GetAltitudeCalibration(AltitudeCalibration_t *AltitudeCalibration)
 {
 	float tempAltitude;
 	const uint8_t nSamplesForReliableAverage = 100;
 
-	*altitudeCalibration = 0;
+
+	AltitudeCalibration->ultrasonic = 0;
+	AltitudeCalibration->altimeter = 0;
 
 	for (int i = 0; i < nSamplesForReliableAverage; i++)
 	{
 		Altitude_BeginMeasurement();
 
-		while ( Altitude_Get(&tempAltitude) == AAQUAD_BUSY )
+		while ( Altitude_UltrasonicGet(&tempAltitude) == AAQUAD_BUSY )
 		{
 			asm("nop");
 		}
 
-		*altitudeCalibration += tempAltitude;
+		AltitudeCalibration->ultrasonic += tempAltitude;
 	}
 
-	*altitudeCalibration /= (float) nSamplesForReliableAverage;
+#if 0	// The abillity to calibrate the altimeter exists, but it was decided to perform the calibration at the handoff altitude (see altitude.c)
+	for (int i = 0; i < nSamplesForReliableAverage; i++)
+	{
+		Altitude_BeginMeasurement();
+
+		while ( Altitude_AltimeterGet(&tempAltitude) == AAQUAD_BUSY )
+		{
+			asm("nop");
+		}
+
+		AltitudeCalibration->altimeter += tempAltitude;
+	}
+#endif
+
+	AltitudeCalibration->ultrasonic /= (float) nSamplesForReliableAverage;
+	AltitudeCalibration->altimeter = 0.0f;
 }
 
 static void GetImuCalibration(ImuData_t* ImuCalibration)
@@ -154,7 +177,7 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 
 	const int nSamplesForReliableAverage = 100;
 	ImuData_t TempImuData;
-	
+
 	#if 0
 	const int timeBetweenMeasurements = 5; // ms
 	float degreeOfRotation = 0.0f;
@@ -240,24 +263,24 @@ static void GetImuCalibration(ImuData_t* ImuCalibration)
 #endif
 }
 
-static void SaveCalibration(PilotResult_t *PilotCalibration, float *altitudeCalibration, ImuData_t* ImuCalibration)
+static void SaveCalibration(PilotResult_t *PilotCalibration, AltitudeCalibration_t *AltitudeCalibration, ImuData_t* ImuCalibration)
 {
 	eeprom_write_block( (const void *) PilotCalibration, (void *) EEPROM_START_ADDRESS, sizeof(PilotResult_t) );
-	eeprom_write_block( (const void *) altitudeCalibration, (void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(float) );
-	eeprom_write_block( (const void *) ImuCalibration, (void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t) + sizeof (float)), sizeof(ImuData_t) );
+	eeprom_write_block( (const void *) AltitudeCalibration, (void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(AltitudeCalibration_t) );
+	eeprom_write_block( (const void *) ImuCalibration, (void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t) + sizeof (AltitudeCalibration_t)), sizeof(ImuData_t) );
 }
 
 void LoadCalibration(void)
 {
 	PilotResult_t PilotCalibration;
-	float altitudeCalibration;
+	AltitudeCalibration_t AltitudeCalibration;
 	ImuData_t ImuCalibration;
 
 	eeprom_read_block( (void *) &PilotCalibration, (const void *) EEPROM_START_ADDRESS, sizeof(PilotResult_t));
-	eeprom_read_block( (void *) &altitudeCalibration, (const void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(float));
-	eeprom_read_block( (void *) &ImuCalibration, (const void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t) + sizeof (float)), sizeof(ImuData_t));
+	eeprom_read_block( (void *) &AltitudeCalibration, (const void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t)), sizeof(AltitudeCalibration_t));
+	eeprom_read_block( (void *) &ImuCalibration, (const void *) (EEPROM_START_ADDRESS + sizeof(PilotResult_t) + sizeof (AltitudeCalibration_t)), sizeof(ImuData_t));
 
-	Altitude_LoadCalibration(altitudeCalibration);
+	Altitude_LoadCalibration(AltitudeCalibration.ultrasonic, AltitudeCalibration.altimeter);
 	Imu_LoadCalibration(&ImuCalibration);
 
     #if 0  // Since we are operating with no magnetic field data, the zero yaw point becomes where we are initially pointing; not a measurement relative to the magnetic north.
