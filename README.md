@@ -1,7 +1,9 @@
 # AAQuad-Evolution
 ---
 
-The AAQuad-Evolution is a flight computer I've designed to control a quadcopter. The computer takes care of continued stabilization in flight while leaving the pilot free to command roll, pitch, and yaw angles as well as altitude. The project is made up of a custom PCB, all the bare-metal C code that runs on the Atmega328pb processor and Matlab simulations used to design and tune the PID algorithms. This is very much a bare bones flight computer that is in no way as feature rich as BetaFlight or any of the other famous FOS flight controllers. Its advantage lies in its simplicity. Anyone with a slight understanding of the dynamics of flight, the C language, and some circuitry could begin to understand the project without being faced with a mountain of complexity and no idea where to start. In the end, the AAQuad-Evolution continues to satisfy my curiosity for flight and increase my understanding of embedded systems all the while providing me with a creative outlet to try out all kinds of cool things.
+The AAQuad-Evolution is a flight computer I've designed to control a quadcopter. The computer takes care of continued stabilization in flight while leaving the pilot free to command roll, pitch, and yaw angles as well as altitude. The project is made up of a custom PCB, all the bare-metal C code that runs on the Atmega328pb processor and Matlab simulations used to design and tune the PID algorithms. This is very much a bare bones flight computer that is in no way as feature rich as BetaFlight or any of the other famous FOS flight controllers. Its advantage lies in its simplicity. Anyone with some understanding of the dynamics of flight, calculus, and circuitry could begin to understand the project without being faced with a mountain of complexity and no idea where to start. In the end, the AAQuad-Evolution continues to satisfy my curiosity for flight and increase my understanding of embedded systems all the while providing me with a creative outlet to try out all kinds of cool things.
+
+![](AircraftPictures/AAQuadTakeoff.gif)
 
 ## Flying the Quad
 ---
@@ -26,7 +28,13 @@ The ranges for all the mentioned targets are defined in src/Pid.h.
 	* The led will turn off, indicating calibration has begun.
 5. Once the led turns on again, the Quad has been successfully calibrated and is ready to be flown.
 
-### Some Pictures
+### Some in flight images
+
+![](AircraftPictures/inFlight1.jpg)
+![](AircraftPictures/inFlight2.jpg)
+![](AircraftPictures/inFlight3.jpg)
+
+### Some close ups
 
 ![](PCB/Photos/front.JPG)
 ![](PCB/Photos/back.JPG)
