@@ -32,6 +32,8 @@ typedef enum state
 
 #define TIMER_VAL_1_PERIOD ((uint16_t) ((float) CTRL_LOOP_PERIOD / (8.0f / (float)F_CPU)))   // assuming clk divider of 8.
 
+#define DANGER_ANGLE 1.3f   // radians
+
 /***********************************************************************************************************************
  * Variables
  **********************************************************************************************************************/
@@ -267,9 +269,26 @@ static Controller_State_t FuseMeasurements_State(void)
 
 static Controller_State_t ConvertToEuler_State(void)
 {
+    static int timesPastDangerAngle;
+
     quat2Euler(q0, q1, q2, q3, &EulerAngles);
 
     gyro2EulerRates(&EulerAngles, ImuData.gyrX, ImuData.gyrY, ImuData.gyrZ, &EulerRates);
+
+    if ( (fabs(EulerAngles.phi) > DANGER_ANGLE) || (fabs(EulerAngles.theta) > DANGER_ANGLE) )
+    {
+        timesPastDangerAngle ++;
+
+        if (timesPastDangerAngle == 5)  // If the quad banks or pitches too hard, the computer presumes it is uncontrolled and goes to failure state.
+        {                               // The number 5 is fairly arbitrary but is just there to make sure we are dealing with a real measurement, not just a fluke or sensor noise.
+            return CTRL_FAILED;
+        }
+    }
+
+    else
+    {
+        timesPastDangerAngle = 0;
+    }
 
     return CTRL_COMPUTE_PID;
 }
