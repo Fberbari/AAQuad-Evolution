@@ -315,6 +315,23 @@ static Controller_State_t WaitForTimer_State(void)
 
 static Controller_State_t Failed_State(void)
 {
+    static bool attemptedActiveShutdown;
+    // The esc can bring the motors to a stop actively much faster than turning off PWM output, which lets them spin down by themselves.
+    // Because of this, before running the emergency shutdown, we should attempt to turn them off actively first.
+    if (! attemptedActiveShutdown)
+    {
+        motors[0] = MOTOR_VALUE_NO_SPIN;
+        motors[1] = MOTOR_VALUE_NO_SPIN;
+        motors[2] = MOTOR_VALUE_NO_SPIN;
+        motors[3] = MOTOR_VALUE_NO_SPIN;
+
+        PwmChip_Send(motors);
+
+        _delay_ms(100);
+
+        attemptedActiveShutdown = true;
+    }
+
     PwmChip_EmergencyShutdown();
 
 	return CTRL_FAILED;
