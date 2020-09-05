@@ -169,14 +169,52 @@ static void InitPeriodTimer(void)
 
 static Controller_State_t GetPilotInstructions_State(void)
 {
+    static int numCallsSinceSuccess;
+    int nextState;
+
 	int r = PilotInstructions_ComputePilotResult(&PilotResult);
 
-    if(r == AAQUAD_FAILED)
-	{
-		return CTRL_FAILED;
-	}
+    switch(r)
+    {
+        case AAQUAD_SUCCEEDED:
+        {
+            numCallsSinceSuccess = 0;
+            nextState = CTRL_GET_IMU_DATA;
+            break;
+        }
 
-	return CTRL_GET_IMU_DATA;
+        case AAQUAD_BUSY:
+        {
+            numCallsSinceSuccess ++;
+
+            int missedComWindows = (CTRL_LOOP_PERIOD / PILOT_INSTRUCTIONS_REFRESH_PERIOD) * numCallsSinceSuccess;
+
+            if (missedComWindows >= 3)  // we've lost communication with the transmitter
+            {
+                nextState = CTRL_FAILED;
+            }
+            else
+            {
+                nextState = CTRL_GET_IMU_DATA;
+            }
+			break;
+        }
+
+        case AAQUAD_FAILED:
+        {
+            nextState = CTRL_FAILED;
+            break;
+        }
+
+        default:
+        {
+            nextState = CTRL_FAILED;
+            break;
+        }
+    }
+
+
+	return nextState;
 }
 
 static Controller_State_t GetImuData_State(void)

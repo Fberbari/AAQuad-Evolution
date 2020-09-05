@@ -4,6 +4,12 @@
 #include "Common.h"
 
 /***********************************************************************************************************************
+ * Definitions
+ **********************************************************************************************************************/
+
+#define PILOT_INSTRUCTIONS_REFRESH_PERIOD 0.02f // seconds
+
+/***********************************************************************************************************************
  * Prototypes
  **********************************************************************************************************************/
 
@@ -27,6 +33,7 @@ void PilotInstructions_LoadCalibration(PilotResult_t *Calibration);
 * the last time the user called this function and the data was valid.
 * Will return AAQUAD_BUSY if all 4 channels are not updated yet.
 * Will return AAQUAD_FAILED in case of any internal failure.
+* If all operation is normal, updates to the channels occur at a rate of 50 Hz.
 * The contents of the [out] parameter are only modified in the case of a successful return.
 * @param[out]	PilotResult 		A pointer the PilotInstructions struct.
 * @return 		AAQUAD_SUCCEEDED, AAQUAD_BUSY, AAQUAD_FAILED
